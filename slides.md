@@ -248,85 +248,74 @@ print(f"Vocab size: {vocab_size}")
 </div>
 
 ---
+clicks: 7
+---
 
 # The Objective
 
 We want our model to learn one thing: **Predict the next token.**
 
-<div class="flex flex-col items-center justify-center h-full mt-[-8rem] space-y-4">
-  
+<div class="flex flex-col items-center justify-center h-full mt-4 space-y-2">
+
   <!-- Step 1: Predict 'A' -->
-  <div class="flex flex-col items-center scale-90">
-    <div class="token-container flex flex-nowrap justify-center items-center font-mono opacity-20 transition-opacity duration-500" :class="$clicks >= 1 ? 'opacity-100' : ''">
-      <div class="token-box token-special bg-emerald-600 text-white border-emerald-700 mr-2" :class="$clicks == 1 ? 'ring-4 ring-blue-400 shadow-lg' : ($clicks > 1 ? 'opacity-50' : '')">BOS</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl" :class="$clicks >= 2 ? 'ring-4 ring-orange-500 scale-110 opacity-100' : ''">A</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30">g</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30">a</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30">v</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30">e</div>
-      <div class="token-box token-special bg-emerald-600 text-white border-emerald-700 ml-2 opacity-30">BOS</div>
+  <div v-click="1" class="flex flex-col items-center scale-90 transform origin-top transition-all duration-500">
+    <div class="token-container flex flex-nowrap justify-center items-center font-mono">
+      <div class="token-box token-special bg-emerald-600 text-white border-emerald-700 mr-2" :class="$clicks >= 1 ? 'ring-4 ring-blue-400 shadow-lg' : ''">{{ $clicks >= 7 ? '56' : 'BOS' }}</div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl" :class="$clicks >= 2 ? 'ring-4 ring-orange-500 scale-110 opacity-100' : 'opacity-30'"><span :class="$clicks >= 7 ? 'text-3xl' : ''">{{ $clicks >= 7 ? '27' : 'A' }}</span></div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30">{{ $clicks >= 7 ? '7' : 'g' }}</div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30">{{ $clicks >= 7 ? '1' : 'a' }}</div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30">{{ $clicks >= 7 ? '22' : 'v' }}</div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30">{{ $clicks >= 7 ? '5' : 'e' }}</div>
+      <div class="token-box token-special bg-emerald-600 text-white border-emerald-700 ml-2 opacity-30">{{ $clicks >= 7 ? '56' : 'BOS' }}</div>
     </div>
-    <div class="h-6 mt-1 text-xs font-bold uppercase tracking-widest">
-      <span v-if="$clicks == 1" class="text-blue-600">Input: [BOS]</span>
-      <span v-if="$clicks >= 2" class="text-orange-600">Target: A</span>
+    <div class="h-6 mt-4 text-xs font-bold uppercase tracking-widest flex justify-between w-[450px]">
+      <span v-if="$clicks >= 1" class="text-blue-600">Input: [{{ $clicks >= 7 ? '56' : 'BOS' }}]</span>
+      <span v-if="$clicks >= 2" class="text-orange-600">Target: {{ $clicks >= 7 ? '27' : 'A' }}</span>
     </div>
   </div>
 
   <!-- Step 2: Predict 'g' -->
-  <div v-click="3" class="flex flex-col items-center scale-90">
-    <div class="token-container flex flex-nowrap justify-center items-center font-mono transition-opacity duration-500" :class="$clicks >= 3 ? 'opacity-100' : 'opacity-10'">
-      <div class="token-box token-special bg-emerald-600 text-white border-emerald-700 mr-2" :class="$clicks >= 3 ? 'ring-4 ring-blue-400 opacity-100' : ''">BOS</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl" :class="$clicks >= 3 ? 'ring-4 ring-blue-400 opacity-100' : ''">A</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl" :class="$clicks >= 4 ? 'ring-4 ring-orange-500 scale-110 opacity-100' : 'opacity-30'">g</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30">a</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30">v</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30">e</div>
-      <div class="token-box token-special bg-emerald-600 text-white border-emerald-700 ml-2 opacity-30">BOS</div>
+  <div v-click="3" class="flex flex-col items-center scale-90 transform origin-top transition-all duration-500">
+    <div class="token-container flex flex-nowrap justify-center items-center font-mono">
+      <div class="token-box token-special bg-emerald-600 text-white border-emerald-700 mr-2" :class="$clicks >= 3 ? 'ring-4 ring-blue-400 opacity-100' : ''">{{ $clicks >= 7 ? '56' : 'BOS' }}</div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl" :class="$clicks >= 3 ? 'ring-4 ring-blue-400 opacity-100' : ''"><span :class="$clicks >= 7 ? 'text-3xl' : ''">{{ $clicks >= 7 ? '27' : 'A' }}</span></div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl" :class="$clicks >= 4 ? 'ring-4 ring-orange-500 scale-110 opacity-100' : 'opacity-30'"><span :class="$clicks >= 7 ? 'text-3xl' : ''">{{ $clicks >= 7 ? '7' : 'g' }}</span></div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30"><span :class="$clicks >= 7 ? 'text-3xl' : ''">{{ $clicks >= 7 ? '1' : 'a' }}</span></div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30"><span :class="$clicks >= 7 ? 'text-3xl' : ''">{{ $clicks >= 7 ? '22' : 'v' }}</span></div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30"><span :class="$clicks >= 7 ? 'text-3xl' : ''">{{ $clicks >= 7 ? '5' : 'e' }}</span></div>
+      <div class="token-box token-special bg-emerald-600 text-white border-emerald-700 ml-2 opacity-30">{{ $clicks >= 7 ? '56' : 'BOS' }}</div>
     </div>
-    <div class="h-6 mt-1 text-xs font-bold uppercase tracking-widest">
-      <span v-if="$clicks == 3" class="text-blue-600">Input: [BOS, A]</span>
-      <span v-if="$clicks >= 4" class="text-orange-600">Target: g</span>
+    <div class="h-6 mt-4 text-xs font-bold uppercase tracking-widest flex justify-between w-[450px]">
+      <span v-if="$clicks >= 3" class="text-blue-600">Input: [{{ $clicks >= 7 ? '56, 27' : 'BOS, A' }}]</span>
+      <span v-if="$clicks >= 4" class="text-orange-600">Target: {{ $clicks >= 7 ? '7' : 'g' }}</span>
     </div>
   </div>
 
   <!-- Step 3: Predict 'a' -->
-  <div v-click="5" class="flex flex-col items-center scale-90">
-    <div class="token-container flex flex-nowrap justify-center items-center font-mono transition-opacity duration-500" :class="$clicks >= 5 ? 'opacity-100' : 'opacity-10'">
-      <div class="token-box token-special bg-emerald-600 text-white border-emerald-700 mr-2" :class="$clicks >= 5 ? 'ring-4 ring-blue-400 opacity-100' : ''">BOS</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl" :class="$clicks >= 5 ? 'ring-4 ring-blue-400 opacity-100' : ''">A</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl" :class="$clicks >= 5 ? 'ring-4 ring-blue-400 opacity-100' : ''">g</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl" :class="$clicks >= 6 ? 'ring-4 ring-orange-500 scale-110 opacity-100' : 'opacity-30'">a</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30">v</div>
-      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30">e</div>
-      <div class="token-box token-special bg-emerald-600 text-white border-emerald-700 ml-2 opacity-30">BOS</div>
+  <div v-click="5" class="flex flex-col items-center scale-90 transform origin-top transition-all duration-500">
+    <div class="token-container flex flex-nowrap justify-center items-center font-mono">
+      <div class="token-box token-special bg-emerald-600 text-white border-emerald-700 mr-2" :class="$clicks >= 5 ? 'ring-4 ring-blue-400 opacity-100' : ''">{{ $clicks >= 7 ? '56' : 'BOS' }}</div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl" :class="$clicks >= 5 ? 'ring-4 ring-blue-400 opacity-100' : ''"><span :class="$clicks >= 7 ? 'text-3xl' : ''">{{ $clicks >= 7 ? '27' : 'A' }}</span></div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl" :class="$clicks >= 5 ? 'ring-4 ring-blue-400 opacity-100' : ''"><span :class="$clicks >= 7 ? 'text-3xl' : ''">{{ $clicks >= 7 ? '7' : 'g' }}</span></div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl" :class="$clicks >= 6 ? 'ring-4 ring-orange-500 scale-110 opacity-100' : 'opacity-30'"><span :class="$clicks >= 7 ? 'text-3xl' : ''">{{ $clicks >= 7 ? '1' : 'a' }}</span></div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30"><span :class="$clicks >= 7 ? 'text-3xl' : ''">{{ $clicks >= 7 ? '22' : 'v' }}</span></div>
+      <div class="token-box border-gray-400 bg-white shadow-sm mx-1 text-4xl opacity-30"><span :class="$clicks >= 7 ? 'text-3xl' : ''">{{ $clicks >= 7 ? '5' : 'e' }}</span></div>
+      <div class="token-box token-special bg-emerald-600 text-white border-emerald-700 ml-2 opacity-30">{{ $clicks >= 7 ? '56' : 'BOS' }}</div>
     </div>
-    <div class="h-6 mt-1 text-xs font-bold uppercase tracking-widest">
-      <span v-if="$clicks == 5" class="text-blue-600">Input: [BOS, A, g]</span>
-      <span v-if="$clicks >= 6" class="text-orange-600">Target: a</span>
+    <div class="h-6 mt-4 text-xs font-bold uppercase tracking-widest flex justify-between w-[450px]">
+      <span v-if="$clicks >= 5" class="text-blue-600">Input: [{{ $clicks >= 7 ? '56, 27, 7' : 'BOS, A, g' }}]</span>
+      <span v-if="$clicks >= 6" class="text-orange-600">Target: {{ $clicks >= 7 ? '1' : 'a' }}</span>
     </div>
   </div>
 
 </div>
 
-<style>
-.token-box {
-  min-width: 2.8rem;
-  height: 3.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-width: 2px;
-  border-style: solid;
-  border-radius: 0.5rem;
-  flex-shrink: 0;
-  transition: all 0.4s ease;
-}
-.token-special {
-  min-width: 2.5rem;
-  height: 2.5rem;
-  font-size: 0.75rem;
-}
-</style>
+<div class="h-0 overflow-hidden">
+  <v-click at="2" />
+  <v-click at="4" />
+  <v-click at="6" />
+  <v-click at="7" />
+</div>
 
 <style>
 .token-box {
