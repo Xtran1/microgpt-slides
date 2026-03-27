@@ -533,6 +533,82 @@ Differentiability: To use backpropagation, we need to calculate smooth gradients
 -->
 
 ---
+layout: default
+---
+
+# The Flow: Slightly Zoomed in
+
+Before we dive deeper, what are the individual parts of the computational graph?
+
+<div class="flex flex-col items-center justify-center mt-2 w-full h-[250px] relative px-4">
+
+  <!-- The Main Horizontal Line -->
+  <div class="absolute left-10 right-10 top-[60%] h-1 bg-gradient-to-r from-gray-200 via-emerald-400 via-orange-400 via-purple-400 to-gray-200 z-0"></div>
+
+  <!-- Residual Skip Connection Highlight (Click 1) -->
+  <svg v-click="1" class="absolute inset-0 w-full h-full pointer-events-none z-10" viewBox="0 0 800 250">
+    <path
+      d="M 170 157 V 230 H 410 V 154 M 410 230 H 580 V 157"
+      fill="none"
+      stroke="#3b82f6"
+      stroke-width="3"
+      stroke-dasharray="8 6"
+      stroke-linejoin="round"
+      stroke-linecap="round"
+      class="opacity-60"
+    />
+    <!-- Flow arrows along the horizontal segments -->
+    <polygon points="290,225 305,230 290,235" fill="#3b82f6" fill-opacity="0.6" />
+    <polygon points="495,225 510,230 495,235" fill="#3b82f6" fill-opacity="0.6" />
+    <text x="400" y="245" text-anchor="middle" class="text-[10px] fill-blue-500 font-bold uppercase tracking-widest">residual connection</text>
+  </svg>
+
+  <div class="flex justify-between items-end w-full z-20">
+    <!-- Step 1: Embeddings -->
+    <div class="flex flex-col items-center w-1/4">
+      <div class="font-mono text-xl font-bold bg-white px-2 py-1 rounded shadow-sm border border-gray-200 mb-8">x</div>
+      <div class="px-3 py-3 bg-emerald-50 border-2 border-emerald-200 text-emerald-800 rounded shadow-sm text-center">
+        <span class="font-bold block text-sm">1. Embeddings</span>
+        <div class="text-[10px] mt-1 leading-tight">Initial vector is<br>created from tokens</div>
+      </div>
+    </div>
+    <!-- Step 2: Attention -->
+    <div class="flex flex-col items-center w-1/4 relative">
+      <!-- Residual Loop -->
+      <div class="w-8 h-8 rounded-full bg-orange-100 border-2 border-orange-400 flex items-center justify-center font-bold text-orange-600 z-20 mb-4 bg-white">+</div>
+      <div class="px-3 py-3 bg-orange-50 border-2 border-orange-300 text-orange-800 rounded-lg shadow-md text-center relative z-10">
+        <span class="font-bold block text-sm">2. Attention</span>
+        <div class="text-[10px] mt-1 leading-tight">Embeddings 'communicate'.<br>Results <strong>added</strong> back to <code>x</code></div>
+        <div class="font-mono text-[9px] mt-2 text-orange-600 bg-white px-1 py-0.5 rounded border border-orange-100">x = x + att(x)</div>
+      </div>
+    </div>
+    <!-- Step 3: MLP -->
+    <div class="flex flex-col items-center w-1/4 relative">
+      <!-- Residual Loop -->
+      <div class="w-8 h-8 rounded-full bg-purple-100 border-2 border-purple-400 flex items-center justify-center font-bold text-purple-600 z-20 mb-4 bg-white">+</div>
+      <div class="px-3 py-3 bg-purple-50 border-2 border-purple-300 text-purple-800 rounded-lg shadow-md text-center relative z-10">
+        <span class="font-bold block text-sm">3. MLP</span>
+        <div class="text-[10px] mt-1 leading-tight">Individual processing.<br><strong>added</strong> back to <code>x</code></div>
+        <div class="font-mono text-[9px] mt-2 text-purple-600 bg-white px-1 py-0.5 rounded border border-purple-100">x = x + mlp(x)</div>
+      </div>
+    </div>
+    <!-- Step 4: Classifier -->
+    <div class="flex flex-col items-center w-1/4">
+      <div class="font-mono text-xl font-bold bg-white px-2 py-1 rounded shadow-sm border border-gray-200 mb-8">x</div>
+      <div class="px-3 py-3 bg-red-50 border-2 border-red-200 text-red-800 rounded shadow-sm text-center">
+        <span class="font-bold block text-sm">4. Classifier</span>
+        <div class="text-[10px] mt-1 leading-tight">Finished vector is<br>converted to probabilities</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="mt-12 text-center text-sm text-gray-500 italic">
+  (Note: At each step, <code>x</code> is stabilized using RMSNorm).
+</div>
+
+---
 layout: two-cols
 layoutClass: gap-12
 ---
@@ -591,6 +667,7 @@ class Value:
   </div>
 
 </div>
+
 
 ---
 layout: two-cols
@@ -852,81 +929,7 @@ What does `build_topo(L)` actually produce using Depth-First Search?
 </div>
 
 
----
-layout: default
----
 
-# The Flow: Slightly Zoomed in
-
-Before we dive deeper, how do these parts connect? They don't just pass data; they **add** to it. Think of our starting vector `x` as a product moving down a factory line.
-
-<div class="flex flex-col items-center justify-center mt-16 w-full h-[250px] relative px-4">
-
-  <!-- The Main Horizontal Line -->
-  <div class="absolute left-10 right-10 top-[60%] h-1 bg-gradient-to-r from-gray-200 via-emerald-400 via-orange-400 via-purple-400 to-gray-200 z-0"></div>
-
-  <!-- Residual Skip Connection Highlight (Click 1) -->
-  <svg v-click="1" class="absolute inset-0 w-full h-full pointer-events-none z-10" viewBox="0 0 800 250">
-    <path
-      d="M 170 157 V 230 H 410 V 154 M 410 230 H 580 V 157"
-      fill="none"
-      stroke="#3b82f6"
-      stroke-width="3"
-      stroke-dasharray="8 6"
-      stroke-linejoin="round"
-      stroke-linecap="round"
-      class="opacity-60"
-    />
-    <!-- Flow arrows along the horizontal segments -->
-    <polygon points="290,225 305,230 290,235" fill="#3b82f6" fill-opacity="0.6" />
-    <polygon points="495,225 510,230 495,235" fill="#3b82f6" fill-opacity="0.6" />
-    <text x="400" y="245" text-anchor="middle" class="text-[10px] fill-blue-500 font-bold uppercase tracking-widest">residual connection</text>
-  </svg>
-
-  <div class="flex justify-between items-end w-full z-20">
-    <!-- Step 1: Embeddings -->
-    <div class="flex flex-col items-center w-1/4">
-      <div class="font-mono text-xl font-bold bg-white px-2 py-1 rounded shadow-sm border border-gray-200 mb-8">x</div>
-      <div class="px-3 py-3 bg-emerald-50 border-2 border-emerald-200 text-emerald-800 rounded shadow-sm text-center">
-        <span class="font-bold block text-sm">1. Embeddings</span>
-        <div class="text-[10px] mt-1 leading-tight">Initial vector is<br>placed on the line.</div>
-      </div>
-    </div>
-    <!-- Step 2: Attention -->
-    <div class="flex flex-col items-center w-1/4 relative">
-      <!-- Residual Loop -->
-      <div class="w-8 h-8 rounded-full bg-orange-100 border-2 border-orange-400 flex items-center justify-center font-bold text-orange-600 z-20 mb-4 bg-white">+</div>
-      <div class="px-3 py-3 bg-orange-50 border-2 border-orange-300 text-orange-800 rounded-lg shadow-md text-center relative z-10">
-        <span class="font-bold block text-sm">2. Attention</span>
-        <div class="text-[10px] mt-1 leading-tight">Embeddings 'communicate'. Results<br><strong>added</strong> back to line.</div>
-        <div class="font-mono text-[9px] mt-2 text-orange-600 bg-white px-1 py-0.5 rounded border border-orange-100">x = x + att(x)</div>
-      </div>
-    </div>
-    <!-- Step 3: MLP -->
-    <div class="flex flex-col items-center w-1/4 relative">
-      <!-- Residual Loop -->
-      <div class="w-8 h-8 rounded-full bg-purple-100 border-2 border-purple-400 flex items-center justify-center font-bold text-purple-600 z-20 mb-4 bg-white">+</div>
-      <div class="px-3 py-3 bg-purple-50 border-2 border-purple-300 text-purple-800 rounded-lg shadow-md text-center relative z-10">
-        <span class="font-bold block text-sm">3. MLP</span>
-        <div class="text-[10px] mt-1 leading-tight">Individual processing.<br><strong>added</strong> back to line.</div>
-        <div class="font-mono text-[9px] mt-2 text-purple-600 bg-white px-1 py-0.5 rounded border border-purple-100">x = x + mlp(x)</div>
-      </div>
-    </div>
-    <!-- Step 4: Classifier -->
-    <div class="flex flex-col items-center w-1/4">
-      <div class="font-mono text-xl font-bold bg-white px-2 py-1 rounded shadow-sm border border-gray-200 mb-8">x</div>
-      <div class="px-3 py-3 bg-red-50 border-2 border-red-200 text-red-800 rounded shadow-sm text-center">
-        <span class="font-bold block text-sm">4. Classifier</span>
-        <div class="text-[10px] mt-1 leading-tight">Finished vector is<br>converted to probabilities.</div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<div class="mt-12 text-center text-sm text-gray-500 italic">
-  (Note: At each step, <code>x</code> is stabilized using RMSNorm).
-</div>
 ---
 layout: default
 ---
