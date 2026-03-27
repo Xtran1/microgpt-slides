@@ -515,39 +515,16 @@ layoutClass: gap-12
 ---
 
 # The `Value` Node
-The fundamental atom of our autograd engine.
 
-```python {all|2|4-8|all}
+```python
 class Value:
-    __slots__ = ('data', 'grad', '_children', '_local_grads')
-
-    def __init__(self, data, children=(), local_grads=()):
-        self.data = data           # The actual value (e.g. 0.5)
-        self.grad = 0              # dLoss / dNode
-        self._children = children  # Pointers to inputs
-        self._local_grads = local_grads # Local partials
+  def __init__(self, data, children, local_grads):
+      self.data = data           # The actual value
+      self.grad = 0              # dLoss / dNode
+      self._children = children  # Pointers to inputs
+      self._local_grads = local_grads # Local partials
 ```
-
-::right::
-
-<div class="flex flex-col items-center justify-center h-full">
-  <div class="text-center mb-4 relative">
-    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-10">Conceptual Anatomy</p>
-    <div class="absolute left-[-60px] top-[60%] flex items-center">
-      <div class="w-12 h-0.5 border-t-2 border-dashed border-gray-400"></div>
-      <div class="w-0 h-0 border-y-4 border-y-transparent border-l-8 border-l-gray-400"></div>
-      <span class="absolute -top-6 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-tighter">_children</span>
-    </div>
-    <div class="relative w-56 h-56 rounded-full border-4 border-gray-300 shadow-xl overflow-hidden flex flex-col">
-      <div class="h-1/2 bg-emerald-50 flex items-center justify-center border-b-2 border-gray-300">
-        <div class="text-2xl font-mono font-bold text-emerald-800">data</div>
-      </div>
-      <div class="h-1/2 bg-orange-50 flex items-center justify-center">
-        <div class="text-2xl font-mono font-bold text-orange-600">grad</div>
-      </div>
-      <div class="absolute left-0 top-1/2 -translate-y-1/2 bg-gray-300 w-3 h-10 rounded-r-lg"></div>
-    </div>
-  </div>
+  <div class="w-full pt-16"></div>
   <div class="w-full px-12 mt-4">
     <v-click>
       <div class="flex items-center h-2 gap-3 mb-1">
@@ -568,6 +545,28 @@ class Value:
       </div>
     </v-click>
   </div>
+
+::right::
+
+<div class="flex flex-col items-center justify-center h-full">
+  <div class="text-center mb-4 relative">
+    <p class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-10">Anatomy</p>
+    <div class="absolute left-[-60px] top-[60%] flex items-center">
+      <div class="w-12 h-0.5 border-t-2 border-dashed border-gray-400"></div>
+      <div class="w-0 h-0 border-y-4 border-y-transparent border-l-8 border-l-gray-400"></div>
+      <span class="absolute -top-6 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-tighter">_children</span>
+    </div>
+    <div class="relative w-56 h-56 rounded-full border-4 border-gray-300 shadow-xl overflow-hidden flex flex-col">
+      <div class="h-1/2 bg-emerald-50 flex items-center justify-center border-b-2 border-gray-300">
+        <div class="text-2xl font-mono font-bold text-emerald-800">data</div>
+      </div>
+      <div class="h-1/2 bg-orange-50 flex items-center justify-center">
+        <div class="text-2xl font-mono font-bold text-orange-600">grad</div>
+      </div>
+      <div class="absolute left-0 top-1/2 -translate-y-1/2 bg-gray-300 w-3 h-10 rounded-r-lg"></div>
+    </div>
+  </div>
+
 </div>
 
 ---
@@ -832,9 +831,9 @@ What does `build_topo(L)` actually produce using Depth-First Search?
 layout: default
 ---
 
-# Embeddings: The Missing Link
+# Embeddings
 
-We know our model operates on a vast graph of `Value` nodes. But our Tokenizer gave us integer IDs. How do integers enter a calculus graph?
+Our model operates on a graph of `Value` nodes, but our Tokenizer gave us integer IDs. What then?
 
 <div class="grid grid-cols-2 gap-10 mt-8">
   <div class="flex flex-col">
@@ -854,20 +853,17 @@ We know our model operates on a vast graph of `Value` nodes. But our Tokenizer g
     </div>
   </div>
 
-  <div class="flex flex-col justify-center space-y-6">
+  <div class="flex flex-col justify-center space-y-1">
     <div v-click="1">
       <h3 class="font-bold text-blue-600 text-xl">A Matrix of Random Parameters</h3>
       <p class="text-gray-600 mt-2 text-sm">
-        An Embedding layer is just a massive 2D grid of <code>Value</code> nodes. <strong>Crucially, it starts completely empty of knowledge.</strong> We initialize it with random noise.
+        An Embedding layer is just a 2D grid of <code>Value</code> nodes. <strong>It starts completely empty of knowledge.</strong> We initialize it with random noise.
       </p>
     </div>
     <div v-click="2">
       <h3 class="font-bold text-emerald-600 text-xl">The Lookup & Learning</h3>
       <p class="text-gray-600 mt-2 text-sm">
-        When we feed Token <code>27</code> into the model, it simply "plucks out" row 27.
-      </p>
-      <p class="text-gray-600 mt-2 text-sm">
-        This row is a vector of random <code>Value</code> nodes—the starting point of our Computation Graph! Because they are <code>Value</code> nodes, their random numbers will be shifted and optimized via backpropagation over millions of iterations until they learn to represent the actual "meaning" of the token.
+        The embedder simply does a lookup in the Embedding Matrix. Because they are <code>Value</code> nodes, their values will be optimized via backpropagation through our computation graph, until they learn to represent the actual "meaning" of the token.
       </p>
     </div>
   </div>
@@ -879,7 +875,7 @@ layout: default
 
 # Positional Embeddings
 
-The transformer evaluates all inputs simultaneously. It has no built-in concept of order. To it, `"Dog bites man"` and `"Man bites dog"` are identically processed!
+The computation graph evaluates all inputs simultaneously. Without adjustment, `"Dog bites man"` and `"Man bites dog"` are identically processed
 
 <div class="flex flex-col items-center mt-10 space-y-8">
 
@@ -903,16 +899,39 @@ The transformer evaluates all inputs simultaneously. It has no built-in concept 
       <div class="text-[10px] text-orange-600 mt-2 uppercase font-bold tracking-wider text-center">The Starting Node</div>
     </div>
   </div>
-
-  <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg w-3/4 text-center shadow-sm">
-    <p class="text-gray-700">
-      We create a <strong>second</strong> embedding matrix just for positions (0, 1, 2...). We pull out the Token vector, pull out the Position vector, and simply <code>__add__</code> them together.
-    </p>
-    <p class="text-gray-700 mt-2">
-      This combined vector enters the computation graph containing both <em>"What this is"</em> and <em>"Where this is."</em>
-    </p>
+    <div class="bg-gray-50 border border-gray-200 rounded-lg w-[85%] min-h-[150px] shadow-sm relative overflow-hidden">
+      <!-- Step 0: The Basics -->
+      <div
+        class="transition-all duration-500 ease-in-out absolute inset-0 p-6 flex flex-col justify-center text-center"
+        :class="$clicks === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'">
+        <span class="font-bold text-gray-700 block mb-1 uppercase tracking-wider text-[10px]">The Basics</span>
+        <p class="text-gray-700 text-sm">
+          We create a <strong>second</strong> embedding matrix just for (integer) positions. The token is then simply the position integer: 0, 1, 2. We lookup this vector as well and simply add them together. This combined vector enters the computation graph containing both <em>"What this is"</em> and <em>"Where this is."</em>
+        </p>
+      </div>
+      <!-- Step 1: The Frame -->
+      <div
+        class="transition-all duration-500 ease-in-out absolute inset-0 p-6 flex flex-col justify-center text-center"
+        :class="$clicks === 1 ? 'opacity-100 translate-y-0' : ($clicks < 1 ? 'opacity-0 translate-y-4 pointer-events-none' : 'opacity-0 -translate-y-4 pointer-events-none')">
+        <span class="font-bold text-gray-700 block mb-1 uppercase tracking-wider text-[10px]">The Frame</span>
+        <p class="text-gray-700 text-sm px-12">
+          The "0" index is tied to the <strong>BOS (Beginning of Sentence)</strong> token. The model learns that position 0 is a special "entry point" where a new context begins.
+        </p>
+      </div>
+      <!-- Step 2: The Latin Problem -->
+      <div
+        class="transition-all duration-500 ease-in-out absolute inset-0 p-6 flex flex-col justify-center text-center"
+        :class="$clicks >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'">
+        <span class="font-bold text-gray-700 block mb-1 uppercase tracking-wider text-[10px]">The Latin Problem</span>
+        <p class="text-gray-700 text-sm px-12">
+          Absolute positions (0, 1, 2...) struggle with long-distance logic. Advanced models use <strong>Relative Encoding</strong>, focusing on <em>distance</em> rather than fixed slots.
+        </p>
+      </div>
+    </div>
+    <!-- Hidden clicks to drive the sequence -->
+    <div v-click class="hidden"></div>
+    <div v-click class="hidden"></div>
   </div>
-</div>
 
 ---
 layout: default
