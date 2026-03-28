@@ -1712,9 +1712,29 @@ for sample_idx in range(20):
 layout: default
 ---
 
+# Now, let's run it!
+
+---
+layout: default
+---
+
 # Questions and Answers
 
 <ul> Some Brain Teasers:
-  <li v-click>What size and kind tokens do modern tokenziers use?</li>
+  <li v-click>What size and kind tokens do modern tokenziers use? Why is this one better or rose?</li>
   <li v-click>Trained Encoders absorb the meaning of a text into a vector. What else could you use embeddings for besides generation?</li>
+  <li v-click>What would break if we removed the causal mask and let each token attend to the future during training?</li>
+  <li v-click>Why can't we just pick the highest-probability token every time during inference?</li>
+  <li v-click>What is the actual job of a residual connection? What gets harder if we remove it?</li>
+  <li v-click>If attention mixes information across tokens, why do we still need the MLP block?</li>
+  <li v-click>What changes if we tokenize at the character level versus subword level?</li>
 </ul>
+<!--
+Suggested answers:
+1. The typical answer is 'subword tokens' which map (poorly) to morphemes. But you can get a feel for it here: https://platform.openai.com/tokenizer. This one is better in the sense that it's language-agnostic and worse in the sense that we get way more tokens and so we need much larger attention blocks for them to make sense (= more RAM). It's also wasting a lot of those resources: phenomenally and cool may be equally important to a sentence but they are 12 vs 4 tokens.
+2. Embeddings are useful for search, retrieval, clustering, semantic similarity, recommendation, classification, anomaly detection, deduplication, and routing inputs to tools or downstream systems.
+3. The model would "cheat" during training by reading the correct future token. Training loss would look artificially good, but autoregressive generation would fail because at inference time the future is not available.
+4. You can do this, it is basically what setting temperature to 0.0 is. It's bad for training because it produces narrow ('brittle') results
+5. Residual connections make optimization more effective by retaining the original signal. Without them, large models tend to lose context and devolve into purely numerical optimization
+6. Attention mixes information between positions, but the MLP does per-token transformation. It gives the model extra nonlinear compute to reshape and refine each token's representation after context has been gathered.
+-->
