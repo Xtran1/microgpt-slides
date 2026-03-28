@@ -33,6 +33,172 @@ Introduction
 transition: slide-up
 ---
 
+# The Bird's Eye View
+
+At its simplest, an LLM is a machine that transforms one sequence of text into another.
+
+<div class="flex items-center justify-center mt-24 space-x-8 h-48 relative">
+
+  <!-- Input Block -->
+  <div class="flex flex-col items-center shrink-0">
+    <div class="w-32 h-20 border-4 border-gray-300 rounded-xl bg-gray-50 flex items-center justify-center shadow-md">
+      <span class="text-xl font-bold text-gray-600 uppercase tracking-widest">Text</span>
+    </div>
+    <div class="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Input</div>
+  </div>
+
+  <!-- Arrow 1 -->
+  <div class="text-3xl text-gray-300 font-bold">→</div>
+
+  <!-- Middle Section: LLM vs Encoder/Decoder -->
+  <div class="relative w-[450px] h-full flex items-center justify-center">
+    <!-- Phase 1: The LLM "Black Box" -->
+    <div
+      class="absolute inset-0 flex flex-col items-center justify-center transition-all duration-700"
+      :class="$clicks >= 1 ? 'opacity-0 scale-75 blur-sm pointer-events-none' : 'opacity-100 scale-100'"
+    >
+      <div class="w-56 h-36 border-4 border-blue-500 rounded-2xl bg-blue-50 flex items-center justify-center shadow-xl ring-8 ring-blue-50">
+        <span class="text-4xl font-black text-blue-600 uppercase tracking-[0.2em]">LLM</span>
+      </div>
+      <div class="mt-4 text-xs font-bold text-blue-400 uppercase tracking-widest">The Black Box</div>
+    </div>
+    <!-- Phase 2: Breaking Apart (Encoder -> Decoder) -->
+    <div
+      class="absolute inset-0 flex items-center justify-center space-x-6 transition-all duration-700 delay-200"
+      :class="$clicks >= 1 ? 'opacity-100 scale-100' : 'opacity-0 scale-110 blur-md pointer-events-none'"
+    >
+      <!-- Encoder -->
+      <div class="flex flex-col items-center">
+        <div class="w-40 h-28 border-4 border-blue-400 rounded-xl bg-blue-50 flex items-center justify-center shadow-lg">
+          <span class="text-xl font-bold text-blue-600 uppercase tracking-widest">Encoder</span>
+        </div>
+        <div class="mt-4 text-[10px] font-bold text-blue-400 uppercase tracking-widest">Understanding</div>
+      </div>
+      <!-- Internal Arrow -->
+      <div class="text-3xl text-blue-300 font-bold">→</div>
+      <!-- Decoder -->
+      <div class="flex flex-col items-center">
+        <div class="w-40 h-28 border-4 border-indigo-400 rounded-xl bg-indigo-50 flex items-center justify-center shadow-lg">
+          <span class="text-xl font-bold text-indigo-600 uppercase tracking-widest">Decoder</span>
+        </div>
+        <div class="mt-4 text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Generation</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Arrow 2 -->
+  <div class="text-3xl text-gray-300 font-bold">→</div>
+
+  <!-- Output Block -->
+  <div class="flex flex-col items-center shrink-0">
+    <div class="w-32 h-20 border-4 border-emerald-500 rounded-xl bg-emerald-50 flex items-center justify-center shadow-md">
+      <span class="text-xl font-bold text-emerald-600 uppercase tracking-widest">Text</span>
+    </div>
+    <div class="mt-4 text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Output</div>
+  </div>
+
+</div>
+
+<div class="mt-12 text-center text-gray-400 italic">
+  <span v-if="$clicks == 0">"How do we turn those words into math, and that math back into words?"</span>
+  <span v-else class="text-blue-500 font-bold">Inside the box, we separate the "What is this?" from the "What comes next?"</span>
+</div>
+
+<!-- Ensure click 1 exists -->
+<div v-click="1" class="hidden"></div>
+
+---
+transition: slide-up
+---
+
+# Inside the Encoder
+
+The first step is turning raw text into a format the math can "see."
+
+<div class="flex items-center justify-center mt-24 space-x-6 h-48 relative px-4">
+
+  <!-- Input Block (Shrinking slightly but not dimming) -->
+  <div class="flex flex-col items-center shrink-0 transition-all duration-700" :class="$clicks >= 1 ? 'scale-75' : ''">
+    <div class="w-32 h-20 border-2 border-gray-300 rounded-xl bg-gray-50 flex items-center justify-center shadow-sm">
+      <span class="text-lg font-bold text-gray-500 uppercase tracking-widest">Text</span>
+    </div>
+    <div class="mt-4 text-[8px] font-bold text-gray-400 uppercase tracking-widest">Input</div>
+  </div>
+
+  <!-- Arrow -->
+  <div class="text-2xl text-gray-300 font-bold transition-all duration-700" :class="$clicks >= 1 ? 'scale-75' : ''">→</div>
+
+  <!-- Encoder Internals -->
+  <div class="relative w-[500px] h-full flex items-center justify-center">
+    <!-- Phase 1: The Encoder Box -->
+    <div
+      class="absolute inset-0 flex flex-col items-center justify-center transition-all duration-700"
+      :class="$clicks >= 1 ? 'opacity-0 scale-90 blur-sm pointer-events-none' : 'opacity-100'"
+    >
+      <div class="w-48 h-32 border-4 border-blue-400 rounded-xl bg-blue-50 flex items-center justify-center shadow-lg">
+        <span class="text-2xl font-bold text-blue-600 uppercase tracking-widest">Encoder</span>
+      </div>
+      <div class="mt-4 text-[10px] font-bold text-blue-400 uppercase tracking-widest">Understanding</div>
+    </div>
+    <!-- Phase 2: Tokens -> Embeddings -->
+    <div
+      class="absolute inset-0 flex items-center justify-center space-x-6 transition-all duration-700 delay-200"
+      :class="$clicks >= 1 ? 'opacity-100 scale-100' : 'opacity-0 scale-110 blur-md pointer-events-none'"
+    >
+      <!-- Tokens -->
+      <div class="flex flex-col items-center">
+        <div class="w-40 h-28 border-4 border-emerald-400 rounded-xl bg-emerald-50 flex items-center justify-center shadow-md">
+          <span class="text-xl font-bold text-emerald-600 uppercase tracking-widest">Tokens</span>
+        </div>
+        <div class="mt-4 text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Integers</div>
+      </div>
+      <div class="text-2xl text-emerald-300 font-bold">→</div>
+      <!-- Embeddings -->
+      <div class="flex flex-col items-center">
+        <div class="w-40 h-28 border-4 border-blue-400 rounded-xl bg-blue-50 flex items-center justify-center shadow-md">
+          <span class="text-xl font-bold text-blue-600 uppercase tracking-widest opacity-100">Embeddings</span>
+        </div>
+        <div class="mt-4 text-[10px] font-bold text-blue-400 uppercase tracking-widest">Vectors</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow (Connecting to Decoder) -->
+  <div class="text-2xl text-indigo-200 font-bold transition-all duration-700" :class="$clicks >= 1 ? 'scale-75' : ''">→</div>
+
+  <!-- Decoder (Shrinking slightly but not dimming) -->
+  <div class="flex flex-col items-center transition-all duration-700" :class="$clicks >= 1 ? 'scale-75' : ''">
+    <div class="w-32 h-20 border-2 border-indigo-400 rounded-xl bg-indigo-50 flex items-center justify-center shadow-sm">
+      <span class="text-lg font-bold text-indigo-400 uppercase tracking-widest">Decoder</span>
+    </div>
+    <div class="mt-4 text-[8px] font-bold text-indigo-300 uppercase tracking-widest">Generation</div>
+  </div>
+
+  <!-- Arrow (Connecting to Output) -->
+  <div class="text-2xl text-emerald-200 font-bold transition-all duration-700" :class="$clicks >= 1 ? 'hidden' : ''">→</div>
+
+  <!-- Output Text (Shrinking slightly but not dimming) -->
+  <div class="flex flex-col items-center shrink-0 transition-all duration-700" :class="$clicks >= 1 ? 'scale-75' : ''">
+    <div class="w-32 h-20 border-2 border-emerald-500 rounded-xl bg-emerald-50 flex items-center justify-center shadow-sm">
+      <span class="text-lg font-bold text-emerald-500 uppercase tracking-widest">Text</span>
+    </div>
+    <div class="mt-4 text-[8px] font-bold text-emerald-400 uppercase tracking-widest">Output</div>
+  </div>
+
+</div>
+
+<div class="mt-12 text-center text-gray-400 italic">
+  <span v-if="$clicks == 0">"We need to go deeper into how the machine 'reads'..."</span>
+  <span v-else class="text-emerald-600 font-bold">The Encoder first chops text into <strong>Tokens</strong>, then translates them into <strong>Embeddings</strong> (high-dimensional math vectors).</span>
+</div>
+
+<div v-click="1" class="hidden"></div>
+
+---
+transition: slide-up
+---
+
 # Setup
 
 - **New Project** - Create a new project in your favorite language
@@ -947,15 +1113,15 @@ How do tokens learn to "talk" to each other? The current token is projected into
     <div class="text-gray-400 font-bold text-2xl">→</div>
     <div class="flex space-x-4">
       <div class="bg-blue-50 border border-blue-200 p-3 rounded-lg shadow-sm text-center w-36">
-        <div class="font-mono font-bold text-blue-800 text-lg">Q <span class="text-gray-500 font-normal text-sm">= x*W_q</span></div>
+        <div class="font-mono font-bold text-blue-800 text-lg">Q <span class="text-gray-500 font-normal text-sm">= x · W_q</span></div>
         <div class="text-[10px] text-blue-600 uppercase tracking-widest mt-1">Query Matrix</div>
       </div>
       <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-lg shadow-sm text-center w-36">
-        <div class="font-mono font-bold text-emerald-800 text-lg">K <span class="text-gray-500 font-normal text-sm">= x*W_k</span></div>
+        <div class="font-mono font-bold text-emerald-800 text-lg">K <span class="text-gray-500 font-normal text-sm">= x · W_k</span></div>
         <div class="text-[10px] text-emerald-600 uppercase tracking-widest mt-1">Key Matrix</div>
       </div>
       <div class="bg-purple-50 border border-purple-200 p-3 rounded-lg shadow-sm text-center w-36">
-        <div class="font-mono font-bold text-purple-800 text-lg">V <span class="text-gray-500 font-normal text-sm">= x*W_v</span></div>
+        <div class="font-mono font-bold text-purple-800 text-lg">V <span class="text-gray-500 font-normal text-sm">= x · W_v</span></div>
         <div class="text-[10px] text-purple-600 uppercase tracking-widest mt-1">Value Matrix</div>
       </div>
     </div>
@@ -964,26 +1130,23 @@ How do tokens learn to "talk" to each other? The current token is projected into
   <!-- Bottom Explanatory Section -->
   <div class="flex flex-col justify-center space-y-4 px-8">
     <div v-click="1">
-      <h3 class="font-bold text-gray-800 text-lg">The Mechanics: Pure Randomness</h3>
-      <p class="text-gray-600 mt-1 text-sm leading-relaxed">
-        The "projection" is just basic matrix multiplication. Crucially, <code>W_q</code>, <code>W_k</code>, and <code>W_v</code> start as completely random numbers. The first time a token passes through, its Query, Key, and Value are utter mathematical garbage.
+      <h3 class="font-bold text-orange-600 text-lg">Alignment via Backpropagation</h3>
+      <p class="text-gray-600 text-sm leading-relaxed">
+        Imagine the training data contains: <code>"The fuzzy dog barks"</code>.
       </p>
-    </div>
-    <div v-click="2">
-      <h3 class="font-bold text-orange-600 text-lg">The Magic: Alignment via Backprop</h3>
-      <p class="text-gray-600 mt-1 text-sm leading-relaxed mb-1">
-        Imagine the sequence <code>"The fuzzy dog"</code>. The model is at <code>"fuzzy"</code> and needs to predict <code>"barks"</code>.
-      </p>
-      <ul class="list-disc pl-6 space-y-1 text-sm text-gray-600">
-        <li><strong>The Accident:</strong> Due to random noise, maybe <code>"fuzzy"</code>'s Query aligns with <code>"dog"</code>'s Key.</li>
-        <li><strong>The Reward:</strong> <code>"fuzzy"</code> absorbs <code>"dog"</code>'s Value, uses it to predict <code>"barks"</code>. Loss is low!</li>
-        <li><strong>The Reinforcement:</strong> Backprop screams: <em>"Whatever numbers made 'fuzzy' match 'dog'—make them bigger!"</em></li>
-      </ul>
-    </div>
-    <div v-click="3">
-      <p class="text-gray-700 italic border-l-4 border-orange-400 pl-4 text-sm mt-2">
-        Nobody hardcodes grammar rules. The "Roles" of Query (What am I looking for?), Key (What do I contain?), and Value (What do I communicate?) emerge organically through millions of micro-adjustments driven by the loss!
-      </p>
-    </div>
+      <ol class="list-disc pl-6 space-y-1 text-[14px] text-gray-600 leading-tight">
+        <li>Random noise makes <code>"fuzzy"</code>'s Query <strong>point in the same direction</strong> as <code>"dog"</code>'s Key.</li>
+        <li>Their <strong>dot product</strong> results in a large positive number—a high Attention Score.</li>
+        <li></li>
+        <li>This score acts as a volume knob, pulling out <code>"dog"</code>'s <strong>Value</strong> to inform the next prediction.</li>
+        <li>If the resulting guess (e.g. <code>"barks"</code>) matches reality (Ground Truth), Loss is low</li>
+        <li>Backpropagation reweighs the specific weights that made that Query and Key align.</li>
+      </ol>
   </div>
 </div>
+</div>
+
+<!--
+        The "Roles" of Query (What am I looking for?), Key (What do I contain?), and Value (What do I communicate?) emerge organically through
+        the structure of the multiplication, guided to 'truthy' values via backpropagation.
+-->
