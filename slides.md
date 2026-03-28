@@ -19,7 +19,7 @@ comark: true
 duration: 35min
 ---
 
-# What is a GPT?
+# What is a Large Language Model?
 
 Making your own generator from scratch
 
