@@ -300,6 +300,7 @@ print(f"Vocab size: {vocab_size}")
 
 ---
 layout: default
+clicks: 4
 ---
 
 # Embeddings
@@ -1182,6 +1183,7 @@ What does `build_topo(L)` actually produce using Depth-First Search?
 
 ---
 layout: default
+clicks: 4
 ---
 
 # Attention: Q, K, V
@@ -1211,26 +1213,259 @@ How do tokens learn to "talk" to each other? The current token is projected into
     </div>
   </div>
 
-  <!-- Bottom Explanatory Section -->
-  <div class="flex flex-col justify-center space-y-4 px-8">
-    <div v-click="1">
+  <div class="relative min-h-[220px] mt-8 px-8">
+    <div class="grid grid-cols-3 gap-6 transition-all duration-500" :class="$clicks < 4 ? 'opacity-100' : 'opacity-0 pointer-events-none absolute inset-x-8 top-0'">
+      <div v-click="1" class="p-5 rounded-xl border border-blue-200 bg-blue-50/70">
+        <div class="text-sm font-bold uppercase tracking-widest text-blue-600">Query</div>
+        <p class="mt-3 text-sm text-gray-700">What am I looking for in the tokens I have seen so far?</p>
+      </div>
+      <div v-click="2" class="p-5 rounded-xl border border-emerald-200 bg-emerald-50/70">
+        <div class="text-sm font-bold uppercase tracking-widest text-emerald-600">Key</div>
+        <p class="mt-3 text-sm text-gray-700">What kind of information does this earlier token contain?</p>
+      </div>
+      <div v-click="3" class="p-5 rounded-xl border border-purple-200 bg-purple-50/70">
+        <div class="text-sm font-bold uppercase tracking-widest text-purple-600">Value</div>
+        <p class="mt-3 text-sm text-gray-700">If the match is strong, what message should flow forward?</p>
+      </div>
+    </div>
+    <div v-click="4" class="transition-all duration-500" :class="$clicks >= 4 ? 'opacity-100' : 'opacity-0 pointer-events-none absolute inset-x-8 top-0'">
       <h3 class="font-bold text-orange-600 text-lg">Alignment via Backpropagation</h3>
-      <p class="text-gray-600 text-sm leading-relaxed">
+      <p class="text-gray-600 text-sm leading-relaxed mt-2">
         Imagine the training data contains: <code>"The fuzzy dog barks"</code>.
       </p>
-      <ol class="list-disc pl-6 space-y-1 text-[14px] text-gray-600 leading-tight">
-        <li>Random noise makes <code>"fuzzy"</code>'s Query <strong>point in the same direction</strong> as <code>"dog"</code>'s Key.</li>
-        <li>Their <strong>dot product</strong> results in a large positive number—a high Attention Score.</li>
-        <li></li>
+      <ol class="list-disc pl-6 space-y-1 text-[14px] text-gray-600 leading-tight mt-3">
+        <li>Random noise makes <code>"dog"</code>'s Query <strong>point in the same direction</strong> as <code>"fuzzy"</code>'s Key.</li>
+        <li>Their <strong>dot product</strong> results in a large positive number: a high Attention Score.</li>
         <li>This score acts as a volume knob, pulling out <code>"dog"</code>'s <strong>Value</strong> to inform the next prediction.</li>
-        <li>If the resulting guess (e.g. <code>"barks"</code>) matches reality (Ground Truth), Loss is low</li>
+        <li>If the resulting guess (e.g. <code>"barks"</code>) matches reality, Loss is low, and vice versa.</li>
         <li>Backpropagation reweighs the specific weights that made that Query and Key align.</li>
       </ol>
+    </div>
   </div>
-</div>
+
+  <div class="h-0 overflow-hidden">
+    <v-click at="1" />
+    <v-click at="2" />
+    <v-click at="3" />
+    <v-click at="4" />
+  </div>
 </div>
 
 <!--
         The "Roles" of Query (What am I looking for?), Key (What do I contain?), and Value (What do I communicate?) emerge organically through
         the structure of the multiplication, guided to 'truthy' values via backpropagation.
 -->
+
+
+---
+layout: default
+clicks: 3
+---
+
+# Four Heads Become One Attention Output
+
+<div class="flex flex-col mt-6">
+  <div class="flex justify-center items-center gap-5">
+    <div class="grid grid-cols-4 gap-3">
+      <div class="px-4 py-5 rounded-xl border-2 border-orange-300 bg-orange-50 shadow-sm text-center w-28">
+        <div class="text-lg font-black text-orange-600">H1</div>
+        <div class="mt-1 text-[10px] uppercase tracking-widest text-orange-500">6 dims</div>
+      </div>
+      <div class="px-4 py-5 rounded-xl border-2 border-emerald-300 bg-emerald-50 shadow-sm text-center w-28">
+        <div class="text-lg font-black text-emerald-600">H2</div>
+        <div class="mt-1 text-[10px] uppercase tracking-widest text-emerald-500">6 dims</div>
+      </div>
+      <div class="px-4 py-5 rounded-xl border-2 border-blue-300 bg-blue-50 shadow-sm text-center w-28">
+        <div class="text-lg font-black text-blue-600">H3</div>
+        <div class="mt-1 text-[10px] uppercase tracking-widest text-blue-500">6 dims</div>
+      </div>
+      <div class="px-4 py-5 rounded-xl border-2 border-purple-300 bg-purple-50 shadow-sm text-center w-28">
+        <div class="text-lg font-black text-purple-600">H4</div>
+        <div class="mt-1 text-[10px] uppercase tracking-widest text-purple-500">6 dims</div>
+      </div>
+    </div>
+    <div class="w-0 h-0 border-y-[10px] border-y-transparent border-l-[14px] border-l-gray-300"></div>
+    <div class="px-6 py-6 rounded-[1.25rem] border-4 border-gray-300 bg-white shadow-lg text-center w-44">
+      <div class="text-xl font-black text-gray-700">Concat</div>
+      <div class="mt-2 text-xs font-mono text-gray-500">24 dims total</div>
+    </div>
+    <div class="w-0 h-0 border-y-[10px] border-y-transparent border-l-[14px] border-l-gray-300"></div>
+    <div class="px-6 py-6 rounded-[1.25rem] border-4 border-orange-400 bg-orange-50 shadow-lg text-center w-48">
+      <div class="text-xl font-black text-orange-700">W_o</div>
+      <div class="mt-2 text-xs font-mono text-orange-600">multiply back to x_attn</div>
+    </div>
+  </div>
+  <div class="grid grid-cols-3 gap-6 mt-10">
+    <div v-click="1" class="p-5 rounded-xl border border-gray-200 bg-gray-50">
+      <div class="text-sm font-bold uppercase tracking-widest text-gray-600">Parallel Views</div>
+      <p class="mt-3 text-sm text-gray-700">Each head can focus on a different pattern in the same context window.</p>
+    </div>
+    <div v-click="2" class="p-5 rounded-xl border border-orange-200 bg-orange-50/70">
+      <div class="text-sm font-bold uppercase tracking-widest text-orange-600">microGPT Numbers</div>
+      <p class="mt-3 text-sm text-gray-700"><code>n_head = 4</code>, <code>n_embd = 24</code>, so each head gets <code>head_dim = 6</code>.</p>
+    </div>
+    <div v-click="3" class="p-5 rounded-xl border border-blue-200 bg-blue-50/70">
+      <div class="text-sm font-bold uppercase tracking-widest text-blue-600">Rejoin</div>
+      <p class="mt-3 text-sm text-gray-700">The output projection mixes the heads back together into one state vector.</p>
+    </div>
+  </div>
+  <div class="h-0 overflow-hidden">
+    <v-click at="1" />
+    <v-click at="2" />
+    <v-click at="3" />
+  </div>
+</div>
+
+---
+layout: default
+---
+
+# The Literal Attention Code
+
+```python {all|2-6|7-9|10|12|all}
+x_attn = []
+for h in range(n_head):
+    hs = h * head_dim
+    q_h = q[hs:hs+head_dim]
+    k_h = [ki[hs:hs+head_dim] for ki in keys[li]]
+    v_h = [vi[hs:hs+head_dim] for vi in values[li]]
+    attn_logits = [sum(q_h[j] * k_h[t][j] for j in range(head_dim)) / head_dim**0.5 for t in range(len(k_h))]
+    attn_weights = softmax(attn_logits)
+    head_out = [sum(attn_weights[t] * v_h[t][j] for t in range(len(v_h))) for j in range(head_dim)]
+    x_attn.extend(head_out)
+
+x = linear(x_attn, state_dict[f'layer{li}.attn_wo'])
+```
+
+<p v-if="$clicks >= 1" class="m-0" :class="$clicks === 1 ? 'text-blue-600' : 'text-gray-400'"><strong>1. Slice one head:</strong> each head takes its own chunk of <code>q</code>, <code>k</code>, and <code>v</code>.</p>
+<p v-if="$clicks >= 2" class="m-0" :class="$clicks === 2 ? 'text-orange-600' : 'text-gray-400'"><strong>2. Read the context:</strong> compute attention logits, softmax them, then form one weighted sum over the values.</p>
+<p v-if="$clicks >= 3" class="m-0" :class="$clicks === 3 ? 'text-purple-600' : 'text-gray-400'"><strong>3. Concat:</strong> <code>x_attn.extend(head_out)</code> appends this head's output onto the growing combined vector.</p>
+<p v-if="$clicks >= 4" class="m-0" :class="$clicks >= 4 ? 'text-emerald-600' : 'text-gray-400'"><strong>4. Multiply by <code>W_o</code>:</strong> after all heads are concatenated, <code>linear(x_attn, ...attn_wo)</code> applies the output matrix.</p>
+
+---
+layout: default
+clicks: 3
+---
+
+# The MLP Block
+
+<div class="flex flex-col mt-6">
+  <div class="flex justify-center items-center gap-5">
+    <div class="px-5 py-5 rounded-xl border-2 border-gray-300 bg-white shadow-sm text-center w-28">
+      <div class="font-mono text-xl font-bold text-gray-700">x</div>
+      <div class="mt-1 text-[10px] uppercase tracking-widest text-gray-400">16 dims</div>
+    </div>
+    <div class="w-0 h-0 border-y-[10px] border-y-transparent border-l-[14px] border-l-gray-300"></div>
+    <div class="px-6 py-5 rounded-xl border-4 border-purple-300 bg-purple-50 shadow-lg text-center w-44">
+      <div class="text-xl font-black text-purple-700">FC1</div>
+      <div class="mt-2 text-xs font-mono text-purple-600">expand to 64</div>
+    </div>
+    <div class="w-0 h-0 border-y-[10px] border-y-transparent border-l-[14px] border-l-gray-300"></div>
+    <div class="px-6 py-5 rounded-xl border-4 border-orange-300 bg-orange-50 shadow-lg text-center w-40">
+      <div class="text-xl font-black text-orange-700">ReLU</div>
+      <div class="mt-2 text-xs font-mono text-orange-600">nonlinearity</div>
+    </div>
+    <div class="w-0 h-0 border-y-[10px] border-y-transparent border-l-[14px] border-l-gray-300"></div>
+    <div class="px-6 py-5 rounded-xl border-4 border-purple-400 bg-purple-50 shadow-lg text-center w-44">
+      <div class="text-xl font-black text-purple-700">FC2</div>
+      <div class="mt-2 text-xs font-mono text-purple-600">compress to 16</div>
+    </div>
+  </div>
+  <div class="grid grid-cols-3 gap-6 mt-10">
+    <div v-click="1" class="p-5 rounded-xl border border-purple-200 bg-purple-50/70">
+      <div class="text-sm font-bold uppercase tracking-widest text-purple-600">Bigger Hidden Space</div>
+      <p class="mt-3 text-sm text-gray-700">The first linear layer expands the token state from 16 numbers to 64.</p>
+    </div>
+    <div v-click="2" class="p-5 rounded-xl border border-orange-200 bg-orange-50/70">
+      <div class="text-sm font-bold uppercase tracking-widest text-orange-600">ReLU</div>
+      <p class="mt-3 text-sm text-gray-700">This model uses <code>ReLU</code>, not GeLU, to keep the implementation minimal.</p>
+    </div>
+    <div v-click="3" class="p-5 rounded-xl border border-blue-200 bg-blue-50/70">
+      <div class="text-sm font-bold uppercase tracking-widest text-blue-600">Per Token</div>
+      <p class="mt-3 text-sm text-gray-700">Unlike attention, the MLP does not mix tokens together. It transforms each token state individually.</p>
+    </div>
+  </div>
+  <div class="h-0 overflow-hidden">
+    <v-click at="1" />
+    <v-click at="2" />
+    <v-click at="3" />
+  </div>
+</div>
+
+---
+layout: two-cols
+layoutClass: gap-12
+---
+
+# One microGPT Layer
+
+```python {all|2-8|9-14|all}
+x_residual = x
+x = rmsnorm(x)
+... attention ...
+x = linear(x_attn, attn_wo)
+x = [a + b for a, b in zip(x, x_residual)]
+
+x_residual = x
+x = rmsnorm(x)
+x = linear(x, mlp_fc1)
+x = [xi.relu() for xi in x]
+x = linear(x, mlp_fc2)
+x = [a + b for a, b in zip(x, x_residual)]
+```
+
+::right::
+
+<div class="flex flex-col justify-center h-full gap-5 mt-2">
+  <div v-click="1" class="p-5 rounded-xl border border-orange-200 bg-orange-50/70">
+    <div class="text-sm font-bold uppercase tracking-widest text-orange-600">1. Attention Sub-Block</div>
+    <p class="mt-3 text-sm text-gray-700">Normalize, compute Q/K/V, combine the heads, then add the result back through a residual connection.</p>
+  </div>
+  <div v-click="2" class="p-5 rounded-xl border border-purple-200 bg-purple-50/70">
+    <div class="text-sm font-bold uppercase tracking-widest text-purple-600">2. MLP Sub-Block</div>
+    <p class="mt-3 text-sm text-gray-700">Normalize again, run the feed-forward network, then add that result back too.</p>
+  </div>
+  <div v-click="3" class="p-5 rounded-xl border border-blue-200 bg-blue-50/70">
+    <div class="text-sm font-bold uppercase tracking-widest text-blue-600">This Specific Model</div>
+    <p class="mt-3 text-sm text-gray-700"><code>n_layer = 1</code>. So this teaching model runs exactly one transformer layer before the final output head.</p>
+  </div>
+</div>
+
+---
+layout: default
+---
+
+# microGPT, Precisely
+
+<div class="grid grid-cols-3 gap-6 mt-10">
+  <div class="p-6 rounded-2xl border-2 border-emerald-200 bg-emerald-50">
+    <div class="text-sm font-bold uppercase tracking-widest text-emerald-600">Tokenizer</div>
+    <div class="mt-4 text-3xl font-black text-emerald-700">Character</div>
+    <div class="mt-2 text-sm text-gray-700">plus one special BOS token</div>
+  </div>
+  <div class="p-6 rounded-2xl border-2 border-blue-200 bg-blue-50">
+    <div class="text-sm font-bold uppercase tracking-widest text-blue-600">Transformer</div>
+    <div class="mt-4 text-3xl font-black text-blue-700">1 Layer</div>
+    <div class="mt-2 text-sm text-gray-700">4 heads, 16-dimensional state</div>
+  </div>
+  <div class="p-6 rounded-2xl border-2 border-purple-200 bg-purple-50">
+    <div class="text-sm font-bold uppercase tracking-widest text-purple-600">Feed-Forward</div>
+    <div class="mt-4 text-3xl font-black text-purple-700">ReLU</div>
+    <div class="mt-2 text-sm text-gray-700">expand to 64, compress back to 16</div>
+  </div>
+  <div class="p-6 rounded-2xl border-2 border-orange-200 bg-orange-50">
+    <div class="text-sm font-bold uppercase tracking-widest text-orange-600">Normalization</div>
+    <div class="mt-4 text-3xl font-black text-orange-700">RMSNorm</div>
+    <div class="mt-2 text-sm text-gray-700">before attention and before MLP</div>
+  </div>
+  <div class="p-6 rounded-2xl border-2 border-red-200 bg-red-50">
+    <div class="text-sm font-bold uppercase tracking-widest text-red-600">Output Head</div>
+    <div class="mt-4 text-3xl font-black text-red-700">lm_head</div>
+    <div class="mt-2 text-sm text-gray-700">one logit for every token in the vocab</div>
+  </div>
+  <div class="p-6 rounded-2xl border-2 border-gray-300 bg-gray-50">
+    <div class="text-sm font-bold uppercase tracking-widest text-gray-600">Goal</div>
+    <div class="mt-4 text-3xl font-black text-gray-700">Next Token</div>
+    <div class="mt-2 text-sm text-gray-700">predict one character at a time</div>
+  </div>
+</div>
