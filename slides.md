@@ -92,10 +92,10 @@ At its simplest, an LLM is a machine that transforms one sequence of text into a
 
   <!-- Output Block -->
   <div class="flex flex-col items-center shrink-0">
-    <div class="w-32 h-20 border-4 border-emerald-500 rounded-xl bg-emerald-50 flex items-center justify-center shadow-md">
-      <span class="text-xl font-bold text-emerald-600 uppercase tracking-widest">Text</span>
+    <div class="w-32 h-20 border-4 border-gray-300 rounded-xl bg-gray-50 flex items-center justify-center shadow-md">
+      <span class="text-xl font-bold text-gray-600 uppercase tracking-widest">Text</span>
     </div>
-    <div class="mt-4 text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Output</div>
+    <div class="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Output</div>
   </div>
 
 </div>
@@ -180,10 +180,10 @@ The first step is turning raw text into a format the math can "see."
 
   <!-- Output Text (Shrinking slightly but not dimming) -->
   <div class="flex flex-col items-center shrink-0 transition-all duration-700" :class="$clicks >= 1 ? 'scale-75' : ''">
-    <div class="w-32 h-20 border-2 border-emerald-500 rounded-xl bg-emerald-50 flex items-center justify-center shadow-sm">
-      <span class="text-lg font-bold text-emerald-500 uppercase tracking-widest">Text</span>
+    <div class="w-32 h-20 border-2 border-gray-300 rounded-xl bg-gray-50 flex items-center justify-center shadow-sm">
+      <span class="text-lg font-bold text-gray-500 uppercase tracking-widest">Text</span>
     </div>
-    <div class="mt-4 text-[8px] font-bold text-emerald-400 uppercase tracking-widest">Output</div>
+    <div class="mt-4 text-[8px] font-bold text-gray-400 uppercase tracking-widest">Output</div>
   </div>
 
 </div>
@@ -299,6 +299,10 @@ GPT is a matrix algebra system. It uses numbers, not strings. How do we get to t
 - **Granularity**: We can tokenize by word, sub-word, or character.
 - **Special Tokens**: We add markers like `BOS` to help the model identify boundaries.
 - **Mapping**: Each unique token is assigned a unique integer ID.
+
+<!--
+In this minimal microGPT version, BOS is also reused as the stop token during generation.
+-->
 
 ::right::
 <div class="flex flex-col h-full mt-4 pr-4 transition-all duration-800">
