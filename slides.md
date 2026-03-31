@@ -21,19 +21,29 @@ duration: 35min
 
 # What is a Large Language Model?
 
-Making your own generator from scratch
+Making your own text generator from scratch
 
 And understanding the logic behind it
-
-<!--
-Introduction
--->
 
 ---
 transition: slide-up
 ---
 
-# Opening the Box
+# Setup
+
+- **New Project** - Create a new project in your favorite language
+- **Data** - Download tropico_species.txt
+
+<br>
+..
+<br>
+That's it
+
+---
+transition: slide-up
+---
+
+# Opening the LLM Box
 
 <div class="mt-6 flex flex-col items-center">
   <div class="grid grid-cols-[8.25rem_auto_9rem_auto_8.25rem] gap-3 items-start w-full max-w-4xl">
@@ -98,9 +108,9 @@ transition: slide-up
 transition: slide-up
 ---
 
-# A Zoomable Map
+# Encoders
 
-Keep the outer journey fixed. Only open the stage we are currently discussing.
+From text to numerical representations
 
 <div class="mt-6 flex flex-col items-center">
   <div class="grid grid-cols-[8.25rem_auto_9rem_auto_9rem_auto_8.25rem] gap-3 items-start w-full max-w-5xl">
@@ -173,19 +183,6 @@ Keep the outer journey fixed. Only open the stage we are currently discussing.
 
 <div v-click="1" class="hidden"></div>
 
----
-transition: slide-up
----
-
-# Setup
-
-- **New Project** - Create a new project in your favorite language
-- **Data** - Download tropico_species.txt
-
-<br>
-..
-<br>
-That's it
 
 ---
 layout: two-cols
@@ -196,7 +193,7 @@ layoutClass: gap-16 grid-cols-[2fr_3fr]
 
 GPT is a matrix algebra system. It uses numbers, not strings. How do we get to those numbers?
 
-- **Granularity**: We can tokenize by word, sub-word, or character.
+- **Granularity**: We can tokenize by word, sub-word, or character (or anything else).
 - **Special Tokens**: We add markers like `BOS` to help the model identify boundaries.
 - **Mapping**: Each unique token is assigned a unique integer ID.
 
@@ -226,16 +223,7 @@ In this minimal microGPT version, BOS is also reused as the stop token during ge
   </div>
 
   <div class="mt-auto mb-16 text-center min-h-[6rem] relative transition-all duration-800">
-    <!-- Steps 1 & 2 -->
-    <div class="transition-all duration-800 absolute inset-x-0 top-0" :class="$clicks < 3 ? 'opacity-100' : 'opacity-0 pointer-events-none'">
-      <v-click at="1"><p class="text-sm italic text-gray-500">Each character becomes a discrete unit...</p></v-click>
-      <v-click at="2"><p class="text-sm italic text-emerald-600 font-bold">...and we wrap the sequence in special tokens.</p></v-click>
-    </div>
-    <!-- Step 3 -->
-    <div class="transition-all duration-800 absolute inset-x-0 top-0" :class="$clicks == 3 ? 'opacity-100' : 'opacity-0 pointer-events-none'">
-      <p class="text-sm italic text-blue-600 font-bold">Finally, we map each unique token to a unique integer ID.</p>
-    </div>
-    <!-- Step 4: Final Punch -->
+    <!-- Task: implement-->
     <div class="transition-all duration-800 absolute inset-x-0 top-0" :class="$clicks >= 4 ? 'opacity-100' : 'opacity-0 pointer-events-none'">
       <p class="text-lg font-bold text-orange-600">Now go ahead and implement your tokenizer.</p>
       <p class="text-sm italic text-gray-600">Run it on the whole dataset to make sure you're not missing tokens.</p>
@@ -300,7 +288,7 @@ print(f"Vocab size: {vocab_size}")
 
 ---
 layout: default
-clicks: 4
+clicks: 2
 ---
 
 # Embeddings
@@ -312,7 +300,7 @@ Our model operates on a graph of `Value` nodes, but our Tokenizer gave us intege
     <div class="flex items-center gap-4 mb-6">
       <div class="px-4 py-2 bg-gray-100 border border-gray-300 rounded font-mono text-xl">Token ID: 27</div>
       <div class="text-gray-400">→</div>
-      <div class="text-sm text-gray-500 italic">"Lookup"</div>
+      <div class="text-md text-gray-500 italic">Lookup</div>
     </div>
     <div class="border-2 border-blue-200 rounded-lg overflow-hidden shadow-sm">
       <div class="bg-blue-50 px-4 py-2 border-b border-blue-200 font-bold text-blue-800">Embedding Matrix</div>
@@ -327,15 +315,15 @@ Our model operates on a graph of `Value` nodes, but our Tokenizer gave us intege
 
   <div class="flex flex-col justify-center space-y-1">
     <div v-click="1">
-      <h3 class="font-bold text-blue-600 text-xl">A Matrix of Random Parameters</h3>
+      <h3 class="font-bold text-blue-600 text-xl">A Matrix of Random Values</h3>
       <p class="text-gray-600 mt-2 text-sm">
-        An Embedding layer is just a 2D grid of <code>Value</code> nodes. <strong>It starts completely empty of knowledge:</strong> we initialize it with random noise.
+        An Embedding layer is just a 2D grid of <code>Value</code> nodes. It starts completely empty of knowledge: we initialize it with random noise.
       </p>
     </div>
     <div v-click="2">
-      <h3 class="font-bold text-emerald-600 text-xl">The Lookup & Learning</h3>
+      <h3 class="font-bold text-emerald-600 text-xl">Learning</h3>
       <p class="text-gray-600 mt-2 text-sm">
-        The embedder simply does a lookup in the Embedding Matrix. The values will be optimized via backpropagation through our computation graph, until they learn to represent the actual "meaning" of the token.
+        The values will be optimized via backpropagation through our computation graph, until they learn to represent the actual "meaning" of the token.
       </p>
     </div>
   </div>
@@ -384,24 +372,14 @@ The computation graph evaluates all inputs simultaneously. Without adjustment, `
       <!-- Step 1: The Frame -->
       <div
         class="transition-all duration-500 ease-in-out absolute inset-0 p-6 flex flex-col justify-center text-center"
-        :class="$clicks === 1 ? 'opacity-100 translate-y-0' : ($clicks < 1 ? 'opacity-0 translate-y-4 pointer-events-none' : 'opacity-0 -translate-y-4 pointer-events-none')">
+        :class="$clicks > 0 ? 'opacity-100 translate-y-0' : ($clicks < 1 ? 'opacity-0 translate-y-4 pointer-events-none' : 'opacity-0 -translate-y-4 pointer-events-none')">
         <span class="font-bold text-gray-700 block mb-1 uppercase tracking-wider text-[10px]">The Frame</span>
         <p class="text-gray-700 text-sm px-12">
           The "0" index is tied to the <strong>BOS (Beginning of Sentence)</strong> token. The model learns that position 0 is a special "entry point" where a new context begins.
         </p>
       </div>
-      <!-- Step 2: The Relative Problem -->
-      <div
-        class="transition-all duration-500 ease-in-out absolute inset-0 p-6 flex flex-col justify-center text-center"
-        :class="$clicks >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'">
-        <span class="font-bold text-gray-700 block mb-1 uppercase tracking-wider text-[10px]">The Relativity Problem</span>
-        <p class="text-gray-700 text-sm px-12">
-          Absolute positions (0, 1, 2...) struggle with long-distance logic. Advanced models use <strong>Relative Encoding</strong>, focusing on <em>distance</em> rather than fixed slots (see ALiBi, RoPE).
-        </p>
-      </div>
     </div>
     <!-- Hidden clicks to drive the sequence -->
-    <div v-click class="hidden"></div>
     <div v-click class="hidden"></div>
   </div>
 
@@ -499,7 +477,7 @@ We want our model to learn one thing: **Predict the next token.**
 layout: default
 ---
 
-# Opening Predict
+# Prediction
 
 <div class="mt-6 flex flex-col items-center">
   <div class="grid grid-cols-[8.25rem_auto_9rem_auto_9rem_auto_8.25rem] gap-3 items-start w-full max-w-5xl">
@@ -671,9 +649,15 @@ layoutClass: gap-12
 
   <div v-click="1">
     <h3 class="font-bold text-purple-600 text-xl">The Softmax Function</h3>
-    <p class="text-gray-600 mt-2 text-sm leading-relaxed">
-      Softmax is our final <strong>Activation Function</strong>. It takes the arbitrary raw output scores of our computation graph and transforms them into a valid probability distribution.
-    </p>
+
+```python
+def softmax(logits):
+    max_val = max(val.data for val in logits)
+    exps = [(val - max_val).exp() for val in logits]
+    total = sum(exps)
+    return [e / total for e in exps]
+```
+
   </div>
   <div v-click="2">
     <h3 class="font-bold text-orange-600 text-xl">Why?</h3>
@@ -695,7 +679,7 @@ Differentiability: To use backpropagation, we need to calculate smooth gradients
 layout: default
 ---
 
-# Opening the Graph
+# Opening the Computation Graph
 
 <div class="mt-6 flex flex-col items-center">
   <div class="grid grid-cols-[6.5rem_auto_7.5rem_auto_9rem_auto_7.5rem_auto_6.5rem] gap-3 items-start w-full max-w-5xl">
