@@ -29,20 +29,6 @@ And understanding the logic behind it
 transition: slide-up
 ---
 
-# Setup
-
-- **New Project** - Create a new project in your favorite language
-- **Data** - Download tropico_species.txt
-
-<br>
-..
-<br>
-That's it
-
----
-transition: slide-up
----
-
 # Opening the LLM Box
 
 <div class="mt-6 flex flex-col items-center">
@@ -567,16 +553,16 @@ A "ranking" of all possible characters.
     <h3 v-click class="text-gray-600">Result:</h3>
     <div v-click="2" class="mt-6 p-4 bg-gray-50 rounded border border-gray-200 font-mono text-sm">
       <div class="flex justify-between border-b border-gray-200 py-1">
-        <span>Token 'e'</span><span class="font-bold text-emerald-600">4.1 <span v-click>(0.85)</span></span>
+        <span>Token 'e'</span><span class="font-bold text-emerald-600">2.4 <span v-click>(0.730)</span></span>
       </div>
       <div class="flex justify-between border-b border-gray-200 py-1 text-gray-400">
-        <span>Token 'a'</span><span>-1.5 <span v-click="3">(0.03)</span></span>
+        <span>Token 'a'</span><span>0.9  <span v-click="3">(0.163)</span></span>
       </div>
       <div class="flex justify-between border-b border-gray-200 py-1 text-gray-400">
-        <span>Token 'i'</span><span>0.3 <span v-click="3">(0.05)</span></span>
+        <span>Token 'i'</span><span>-0.6 <span v-click="3">(0.036)</span></span>
       </div>
       <div class="flex justify-between py-1 text-gray-300">
-        <span>...others</span><span>0.5 <span v-click="3">(0.07)</span></span>
+        <span>...others</span><span>0.2 <span v-click="3">(0.079)</span></span>
       </div>
     </div>
   </div>
@@ -605,10 +591,10 @@ layoutClass: gap-12
   <div class="p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
     <h3 class="text-lg font-bold text-gray-700 mb-2">Raw Logits</h3>
     <div class="font-mono text-sm text-gray-600 space-y-1">
-      <div class="flex justify-between"><span>Token 'e':</span><span>4.2</span></div>
-      <div class="flex justify-between"><span>Token 'a':</span><span>-1.5</span></div>
-      <div class="flex justify-between"><span>Token 'i':</span><span>0.3</span></div>
-      <div class="flex justify-between text-gray-400"><span>...others:</span><span>...</span></div>
+      <div class="flex justify-between"><span>Token 'e':</span><span>2.4</span></div>
+      <div class="flex justify-between"><span>Token 'a':</span><span>0.9</span></div>
+      <div class="flex justify-between"><span>Token 'i':</span><span>-0.6</span></div>
+      <div class="flex justify-between text-gray-400"><span>...others:</span><span>0.2</span></div>
     </div>
   </div>
   <div v-click="1" class="flex flex-col space-y-4">
@@ -616,10 +602,10 @@ layoutClass: gap-12
     <div class="p-4 border-2 border-purple-200 rounded-lg bg-purple-50 shadow-sm">
       <h3 class="text-lg font-bold text-purple-700 mb-2">Probabilities</h3>
       <div class="font-mono text-sm text-gray-600 space-y-1">
-        <div class="flex justify-between"><span>Token 'e':</span><span class="text-emerald-600 font-bold">0.85</span></div>
-        <div class="flex justify-between"><span>Token 'a':</span><span>0.05</span></div>
-        <div class="flex justify-between"><span>Token 'i':</span><span>0.03</span></div>
-        <div class="flex justify-between text-gray-400"><span>...others:</span><span>0.07</span></div>
+        <div class="flex justify-between"><span>Token 'e':</span><span class="text-emerald-600 font-bold">0.73</span></div>
+        <div class="flex justify-between"><span>Token 'a':</span><span>0.163</span></div>
+        <div class="flex justify-between"><span>Token 'i':</span><span>0.036</span></div>
+        <div class="flex justify-between text-gray-400"><span>...others:</span><span>0.08</span></div>
       </div>
     </div>
   </div>
