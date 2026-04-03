@@ -29,20 +29,6 @@ And understanding the logic behind it
 transition: slide-up
 ---
 
-# Setup
-
-- **New Project** - Create a new project in your favorite language
-- **Data** - Download tropico_species.txt
-
-<br>
-..
-<br>
-That's it
-
----
-transition: slide-up
----
-
 # Opening the LLM Box
 
 <div class="mt-6 flex flex-col items-center">
@@ -89,13 +75,13 @@ transition: slide-up
     >
       <div class="flex flex-col items-center">
         <div class="w-52 h-32 border-4 border-blue-400 rounded-[1.5rem] bg-blue-50 flex items-center justify-center shadow-lg">
-          <span class="text-2xl font-black text-blue-600 uppercase tracking-[0.14em]">Encoder</span>
+          <span class="text-2xl font-black text-blue-600 uppercase tracking-[0.14em]">Represent</span>
         </div>
       </div>
       <div class="text-4xl text-blue-300 font-bold">→</div>
       <div class="flex flex-col items-center">
         <div class="w-52 h-32 border-4 border-indigo-400 rounded-[1.5rem] bg-indigo-50 flex items-center justify-center shadow-lg">
-          <span class="text-2xl font-black text-indigo-600 uppercase tracking-[0.14em]">Decoder</span>
+          <span class="text-2xl font-black text-indigo-600 uppercase tracking-[0.14em]">Predict</span>
         </div>
       </div>
     </div>
@@ -191,11 +177,15 @@ layoutClass: gap-16 grid-cols-[2fr_3fr]
 
 # Tokenizer
 
-GPT is a matrix algebra system. It uses numbers, not strings. How do we get to those numbers?
+GPT: matrix algebra system
 
-- **Granularity**: We can tokenize by word, sub-word, or character (or anything else).
-- **Special Tokens**: We add markers like `BOS` to help the model identify boundaries.
-- **Mapping**: Each unique token is assigned a unique integer ID.
+<v-clicks>
+
+- **Granularity**: By word, sub-word, or character (or anything else).
+- **Special Tokens**: Markers like `BOS` for boundaries.
+- **Mapping**: Unique integer per token.
+
+</v-clicks>
 
 <!--
 In this minimal microGPT version, BOS is also reused as the stop token during generation.
@@ -293,7 +283,7 @@ clicks: 2
 
 # Embeddings
 
-Our model operates on a graph of `Value` nodes, but our Tokenizer gave us integer IDs. What now?
+Map token to meaning.
 
 <div class="grid grid-cols-2 gap-10 mt-8">
   <div class="flex flex-col">
@@ -305,9 +295,9 @@ Our model operates on a graph of `Value` nodes, but our Tokenizer gave us intege
     <div class="border-2 border-blue-200 rounded-lg overflow-hidden shadow-sm">
       <div class="bg-blue-50 px-4 py-2 border-b border-blue-200 font-bold text-blue-800">Embedding Matrix</div>
       <div class="p-4 font-mono text-xs text-gray-600 space-y-1">
-        <div class="flex justify-between text-gray-400"><span>Row 26</span><span>[Value, Value, Value, ...]</span></div>
-        <div class="flex justify-between bg-blue-100 -mx-4 px-4 py-1 text-blue-900 font-bold border-y border-blue-200"><span>Row 27</span><span>[Value(-0.1), Value(0.5), ...]</span></div>
-        <div class="flex justify-between text-gray-400"><span>Row 28</span><span>[Value, Value, Value, ...]</span></div>
+        <div class="flex justify-between text-gray-400"><span>Token 26</span><span>[Value, Value, Value, ...]</span></div>
+        <div class="flex justify-between bg-blue-100 -mx-4 px-4 py-1 text-blue-900 font-bold border-y border-blue-200"><span>Token 27</span><span>[Value(-0.1), Value(0.5), ...]</span></div>
+        <div class="flex justify-between text-gray-400"><span>Token 28</span><span>[Value, Value, Value, ...]</span></div>
         <div class="text-center text-gray-400 mt-2">...</div>
       </div>
     </div>
@@ -315,15 +305,15 @@ Our model operates on a graph of `Value` nodes, but our Tokenizer gave us intege
 
   <div class="flex flex-col justify-center space-y-1">
     <div v-click="1">
-      <h3 class="font-bold text-blue-600 text-xl">A Matrix of Random Values</h3>
+      <h3 class="font-bold text-blue-600 text-xl">A Matrix of Values</h3>
       <p class="text-gray-600 mt-2 text-sm">
-        An Embedding layer is just a 2D grid of <code>Value</code> nodes. It starts completely empty of knowledge: we initialize it with random noise.
+        2D grid of <code>Value</code>s, called weights.
       </p>
     </div>
     <div v-click="2">
-      <h3 class="font-bold text-emerald-600 text-xl">Learning</h3>
+      <h3 class="font-bold text-emerald-600 text-xl">Parameters</h3>
       <p class="text-gray-600 mt-2 text-sm">
-        The values will be optimized via backpropagation through our computation graph, until they learn to represent the actual "meaning" of the token.
+          Weights obtained through learning.
       </p>
     </div>
   </div>
@@ -335,61 +325,49 @@ layout: default
 
 # Positional Embeddings
 
-The computation graph evaluates all inputs simultaneously. Without adjustment, `"Dog bites man"` and `"Man bites dog"` are identically processed
+
+<v-clicks>
+
+- Capture position in separate embedding.
+- Differentiates `"Dog bites man"` and `"Man bites dog"`.
+
+</v-clicks>
 
 <div class="flex flex-col items-center mt-10 space-y-8">
 
   <div class="flex items-center gap-6 w-full justify-center">
-    <div class="flex flex-col items-center w-40">
+    <div v-click class="flex flex-col items-center w-40">
       <div class="px-4 py-2 bg-emerald-50 text-emerald-800 border-2 border-emerald-200 rounded font-mono shadow-sm">Token: 27</div>
       <div class="text-gray-400 my-2">↓ Lookup</div>
       <div class="px-2 py-2 border-2 border-gray-300 rounded font-mono text-sm bg-white">[ 0.5, -0.1 ]</div>
       <div class="text-[10px] text-gray-400 mt-1 uppercase font-bold tracking-wider text-center">Token Emb</div>
     </div>
-    <div class="text-3xl text-gray-400 font-bold">+</div>
-    <div class="flex flex-col items-center w-40">
-      <div class="px-4 py-2 bg-blue-50 text-blue-800 border-2 border-blue-200 rounded font-mono shadow-sm">Pos: 0</div>
+    <div v-click="4" class="text-3xl text-gray-400 font-bold">+</div>
+    <div v-click="4" class="flex flex-col items-center w-40">
+      <div class="px-4 py-2 bg-blue-50 text-blue-800 border-2 border-blue-200 rounded font-mono shadow-sm">Pos: 1</div>
       <div class="text-gray-400 my-2">↓ Lookup</div>
       <div class="px-2 py-2 border-2 border-gray-300 rounded font-mono text-sm bg-white">[ -0.2, 0.8 ]</div>
       <div class="text-[10px] text-gray-400 mt-1 uppercase font-bold tracking-wider text-center">Positional Emb</div>
     </div>
-    <div class="text-3xl text-gray-400 font-bold">=</div>
-    <div class="flex flex-col items-center mt-[44px] w-44">
+    <div v-click="5" class="text-3xl text-gray-400 font-bold">=</div>
+    <div v-click="5" class="flex flex-col items-center mt-[44px] w-44">
       <div class="px-2 py-3 border-4 border-orange-400 bg-orange-50 rounded-lg font-mono text-sm shadow-md font-bold text-orange-800 text-center">[ 0.3, 0.7 ]</div>
       <div class="text-[10px] text-orange-600 mt-2 uppercase font-bold tracking-wider text-center">The Starting Node</div>
     </div>
   </div>
-    <div class="bg-gray-50 border border-gray-200 rounded-lg w-[85%] min-h-[150px] shadow-sm relative overflow-hidden">
-      <!-- Step 0: The Basics -->
-      <div
-        class="transition-all duration-500 ease-in-out absolute inset-0 p-6 flex flex-col justify-center text-center"
-        :class="$clicks === 0 ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'">
-        <span class="font-bold text-gray-700 block mb-1 uppercase tracking-wider text-[10px]">The Basics</span>
-        <p class="text-gray-700 text-sm">
-          We create a <strong>second</strong> embedding matrix just for (integer) positions. The token is then simply the position integer: 0, 1, 2. We lookup this vector as well and simply add them together. This combined vector enters the computation graph containing both <em>"What this is"</em> and <em>"Where this is."</em>
-        </p>
-      </div>
-      <!-- Step 1: The Frame -->
-      <div
-        class="transition-all duration-500 ease-in-out absolute inset-0 p-6 flex flex-col justify-center text-center"
-        :class="$clicks > 0 ? 'opacity-100 translate-y-0' : ($clicks < 1 ? 'opacity-0 translate-y-4 pointer-events-none' : 'opacity-0 -translate-y-4 pointer-events-none')">
-        <span class="font-bold text-gray-700 block mb-1 uppercase tracking-wider text-[10px]">The Frame</span>
-        <p class="text-gray-700 text-sm px-12">
-          The "0" index is tied to the <strong>BOS (Beginning of Sentence)</strong> token. The model learns that position 0 is a special "entry point" where a new context begins.
-        </p>
-      </div>
-    </div>
-    <!-- Hidden clicks to drive the sequence -->
-    <div v-click class="hidden"></div>
-  </div>
+</div>
+
+---
+layout: section
+---
+
+# The Objective
 
 ---
 clicks: 7
 ---
 
-# The Objective
-
-We want our model to learn one thing: **Predict the next token.**
+# The Objective | Predict the next token
 
 <div class="flex flex-col items-center justify-center h-full mt-4 space-y-2">
 
@@ -565,37 +543,36 @@ layout: default
 layout: default
 ---
 
-# The Output: Probability Distribution
+# The Output in Logits
 
-The model doesn't return a single character. It returns a "ranking" of all possible characters.
+A "ranking" of all possible characters.
 
 <div class="grid grid-cols-2 gap-10 mt-10">
   <div>
-    <h3 class="font-mono text-emerald-700 mb-4">Input: "Agav"</h3>
-    <p class="text-gray-600">The model outputs a vector of 56 numbers (one for each token in our vocab).</p>
-    <div class="mt-6 p-4 bg-gray-50 rounded border border-gray-200 font-mono text-sm">
+    <h3 v-click class="font-mono text-emerald-700 mb-4">Input: "Agav"</h3>
+    <h3 v-click class="text-gray-600">Result:</h3>
+    <div v-click="2" class="mt-6 p-4 bg-gray-50 rounded border border-gray-200 font-mono text-sm">
       <div class="flex justify-between border-b border-gray-200 py-1">
-        <span>Token 'e'</span><span class="font-bold text-emerald-600">0.82 (82%)</span>
+        <span>Token 'e'</span><span class="font-bold text-emerald-600">2.4 <span v-click>(0.730)</span></span>
       </div>
       <div class="flex justify-between border-b border-gray-200 py-1 text-gray-400">
-        <span>Token 'a'</span><span>0.05 (5%)</span>
+        <span>Token 'a'</span><span>0.9  <span v-click="3">(0.163)</span></span>
       </div>
       <div class="flex justify-between border-b border-gray-200 py-1 text-gray-400">
-        <span>Token 'i'</span><span>0.03 (3%)</span>
+        <span>Token 'i'</span><span>-0.6 <span v-click="3">(0.036)</span></span>
       </div>
       <div class="flex justify-between py-1 text-gray-300">
-        <span>...others</span><span>0.10 (10%)</span>
+        <span>...others</span><span>0.2 <span v-click="3">(0.079)</span></span>
       </div>
     </div>
   </div>
-
   <div class="flex flex-col justify-center">
     <div v-click>
       <h3 class="font-bold text-orange-600">Why a distribution?</h3>
       <ul class="mt-2 space-y-2 text-sm text-gray-600">
-        <li><strong>Sampling:</strong> We can pick the 2nd or 3rd choice to get creative (Temperature).</li>
-        <li><strong>Certainty:</strong> The model can tell us how "sure" it is.</li>
-        <li><strong>Loss:</strong> We compare this distribution to the "correct" one (where the target token has 1.0) to calculate our error.</li>
+        <li>Pick probabilistically (Temperature).</li>
+        <li>Show certainty</li>
+        <li>Flexibility in training</li>
       </ul>
     </div>
   </div>
@@ -614,10 +591,10 @@ layoutClass: gap-12
   <div class="p-4 border-2 border-gray-200 rounded-lg bg-gray-50">
     <h3 class="text-lg font-bold text-gray-700 mb-2">Raw Logits</h3>
     <div class="font-mono text-sm text-gray-600 space-y-1">
-      <div class="flex justify-between"><span>Token 'e':</span><span>4.2</span></div>
-      <div class="flex justify-between"><span>Token 'a':</span><span>-1.5</span></div>
-      <div class="flex justify-between"><span>Token 'i':</span><span>0.3</span></div>
-      <div class="flex justify-between text-gray-400"><span>...others:</span><span>...</span></div>
+      <div class="flex justify-between"><span>Token 'e':</span><span>2.4</span></div>
+      <div class="flex justify-between"><span>Token 'a':</span><span>0.9</span></div>
+      <div class="flex justify-between"><span>Token 'i':</span><span>-0.6</span></div>
+      <div class="flex justify-between text-gray-400"><span>...others:</span><span>0.2</span></div>
     </div>
   </div>
   <div v-click="1" class="flex flex-col space-y-4">
@@ -625,10 +602,10 @@ layoutClass: gap-12
     <div class="p-4 border-2 border-purple-200 rounded-lg bg-purple-50 shadow-sm">
       <h3 class="text-lg font-bold text-purple-700 mb-2">Probabilities</h3>
       <div class="font-mono text-sm text-gray-600 space-y-1">
-        <div class="flex justify-between"><span>Token 'e':</span><span class="text-emerald-600 font-bold">0.82</span></div>
-        <div class="flex justify-between"><span>Token 'a':</span><span>0.05</span></div>
-        <div class="flex justify-between"><span>Token 'i':</span><span>0.03</span></div>
-        <div class="flex justify-between text-gray-400"><span>...others:</span><span>0.10</span></div>
+        <div class="flex justify-between"><span>Token 'e':</span><span class="text-emerald-600 font-bold">0.73</span></div>
+        <div class="flex justify-between"><span>Token 'a':</span><span>0.163</span></div>
+        <div class="flex justify-between"><span>Token 'i':</span><span>0.036</span></div>
+        <div class="flex justify-between text-gray-400"><span>...others:</span><span>0.08</span></div>
       </div>
     </div>
   </div>
