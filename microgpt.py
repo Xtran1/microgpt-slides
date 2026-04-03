@@ -2,20 +2,16 @@
 The most atomic way to train and run inference for a GPT in pure, dependency-free Python.
 This file is the complete algorithm.
 Everything else is just efficiency.
+
 @karpathy
 """
 
-import os       # os.path.exists
 import math     # math.log, math.exp
 import random   # random.seed, random.choices, random.gauss, random.shuffle
 random.seed(42) # Let there be order among chaos
 
 # Let there be a Dataset `docs`: list[str] of documents (e.g. a list of names)
-if not os.path.exists('input.txt'):
-    import urllib.request
-    names_url = 'https://raw.githubusercontent.com/karpathy/makemore/988aa59/names.txt'
-    urllib.request.urlretrieve(names_url, 'input.txt')
-docs = [line.strip() for line in open('input.txt') if line.strip()]
+docs = [line.strip() for line in open('tropico_species.txt') if line.strip()]
 random.shuffle(docs)
 print(f"num docs: {len(docs)}")
 
@@ -23,7 +19,9 @@ print(f"num docs: {len(docs)}")
 uchars = sorted(set(''.join(docs))) # unique characters in the dataset become token ids 0..n-1
 BOS = len(uchars) # token id for a special Beginning of Sequence (BOS) token
 vocab_size = len(uchars) + 1 # total number of unique tokens, +1 is for BOS
+
 print(f"vocab size: {vocab_size}")
+print(uchars)
 
 # Let there be Autograd to recursively apply the chain rule through a computation graph
 class Value:
@@ -148,7 +146,7 @@ m = [0.0] * len(params) # first moment buffer
 v = [0.0] * len(params) # second moment buffer
 
 # Repeat in sequence
-num_steps = 1000 # number of training steps
+num_steps = 500 # number of training steps
 for step in range(num_steps):
 
     # Take single document, tokenize it, surround it with BOS special token on both sides
