@@ -928,7 +928,7 @@ def __add__(self, other):
 
 ---
 layout: default
-clicks: 6
+clicks: 3
 ---
 
 # A Tiny Graph in Action
@@ -968,178 +968,32 @@ Let's trace both passes for `L = a * b + a`.
   <div class="absolute left-[80px] top-[60px] w-28 bg-white border-2 border-gray-300 rounded-lg shadow-md z-10 text-center overflow-hidden">
     <div class="bg-gray-100 font-bold py-1 border-b border-gray-300">a</div>
     <div class="py-1 flex justify-between px-3 text-sm" :class="$clicks >= 1 ? 'text-emerald-600 font-bold bg-emerald-50' : 'text-gray-300'"><span>d:</span><span>2.0</span></div>
-    <div class="py-1 flex justify-between px-3 text-sm border-t border-gray-100" :class="$clicks >= 6 ? 'text-orange-600 font-bold bg-orange-50' : ($clicks >= 4 ? 'text-orange-400 font-bold' : 'text-gray-300')"><span>g:</span><span>{{ $clicks >= 6 ? '-2.0' : ($clicks >= 4 ? '1.0' : '0.0') }}</span></div>
   </div>
 
   <!-- Node B -->
   <div class="absolute left-[80px] top-[220px] w-28 bg-white border-2 border-gray-300 rounded-lg shadow-md z-10 text-center overflow-hidden">
     <div class="bg-gray-100 font-bold py-1 border-b border-gray-300">b</div>
     <div class="py-1 flex justify-between px-3 text-sm" :class="$clicks >= 1 ? 'text-emerald-600 font-bold bg-emerald-50' : 'text-gray-300'"><span>d:</span><span>-3.0</span></div>
-    <div class="py-1 flex justify-between px-3 text-sm border-t border-gray-100" :class="$clicks >= 5 ? 'text-orange-600 font-bold bg-orange-50' : 'text-gray-300'"><span>g:</span><span>{{ $clicks >= 5 ? '2.0' : '0.0' }}</span></div>
   </div>
 
   <!-- Node C -->
   <div class="absolute left-[380px] top-[140px] w-28 bg-white border-2 border-gray-300 rounded-lg shadow-md z-10 text-center overflow-hidden">
     <div class="bg-gray-100 font-bold py-1 border-b border-gray-300">c <span class="font-normal text-xs text-gray-500">(a*b)</span></div>
     <div class="py-1 flex justify-between px-3 text-sm" :class="$clicks >= 2 ? 'text-emerald-600 font-bold bg-emerald-50' : 'text-gray-300'"><span>d:</span><span>-6.0</span></div>
-    <div class="py-1 flex justify-between px-3 text-sm border-t border-gray-100" :class="$clicks >= 4 ? 'text-orange-600 font-bold bg-orange-50' : 'text-gray-300'"><span>g:</span><span>{{ $clicks >= 4 ? '1.0' : '0.0' }}</span></div>
   </div>
 
   <!-- Node L -->
   <div class="absolute left-[650px] top-[140px] w-28 bg-white border-2 border-gray-300 rounded-lg shadow-md z-10 text-center overflow-hidden">
     <div class="bg-red-50 text-red-800 font-bold py-1 border-b border-gray-300">L <span class="font-normal text-xs opacity-70">(c+a)</span></div>
     <div class="py-1 flex justify-between px-3 text-sm" :class="$clicks >= 3 ? 'text-emerald-600 font-bold bg-emerald-50' : 'text-gray-300'"><span>d:</span><span>-4.0</span></div>
-    <div class="py-1 flex justify-between px-3 text-sm border-t border-gray-100" :class="$clicks >= 3 ? 'text-orange-600 font-bold bg-orange-50' : 'text-gray-300'"><span>g:</span><span>{{ $clicks >= 3 ? '1.0' : '0.0' }}</span></div>
   </div>
 </div>
 
 <div class="mt-4 text-center h-12">
   <p v-if="$clicks === 1" class="text-emerald-600"><strong>1. Inputs:</strong> We start with raw values for a and b.</p>
   <p v-if="$clicks === 2" class="text-emerald-600"><strong>2. Forward Pass:</strong> Multiply a and b to get c.</p>
-  <p v-if="$clicks === 3" class="text-emerald-600"><strong>3. Output & Base Grad:</strong> Add a to c to get L. We set L.grad = 1.0.</p>
-  <p v-if="$clicks === 4" class="text-orange-600"><strong>4. Backward (Add):</strong> Addition distributes the gradient equally. c.grad = 1.0, a.grad += 1.0.</p>
-  <p v-if="$clicks === 5" class="text-orange-600"><strong>5. Backward (Mul):</strong> Multiply swaps data values for grads. b.grad = a.data &times; c.grad = 2.0.</p>
-  <p v-if="$clicks === 6" class="text-orange-600"><strong>6. Accumulation:</strong> a.grad receives b.data &times; c.grad = -3.0. Total a.grad = 1.0 + (-3.0) = -2.0!</p>
+  <p v-if="$clicks === 3" class="text-emerald-600"><strong>3. Output & Base Grad:</strong> Add a to c to get L.</p>
 </div>
-
----
-layout: two-cols
-layoutClass: gap-12
----
-
-# Orchestrating Backprop
-How does the network actually run the backward pass on thousands of nodes in the right order?
-
-```python {all|2-10|11|12-14|all}
-def backward(self):
-    topo = []
-    visited = set()
-    def build_topo(v):
-        if v not in visited:
-            visited.add(v)
-            for child in v._children:
-                build_topo(child)
-            topo.append(v)
-    build_topo(self)
-
-    self.grad = 1.0 # The base gradient
-    for v in reversed(topo):
-        # Accumulate grads to children
-        for child, local_grad in zip(v._children, v._local_grads):
-            child.grad += local_grad * v.grad
-```
-
-::right::
-
-<div class="flex flex-col justify-center h-full mt-4 space-y-6">
-  <div v-click="1">
-    <h3 class="text-xl font-bold text-emerald-600 mb-2">1. Topological Sort</h3>
-    <p class="text-gray-600 text-sm">
-      We start at the final output (Loss) and recursively visit all nodes. A node is only appended to <code>topo</code> <em>after</em> all its inputs (children) have been processed.
-    </p>
-  </div>
-
-  <div v-click="2">
-    <h3 class="text-xl font-bold text-blue-600 mb-2">2. The Seed</h3>
-    <p class="text-gray-600 text-sm">
-      We set the gradient of the Loss to <code>1.0</code>. (A unit change in the loss affects the loss by exactly 1.0).
-    </p>
-  </div>
-
-  <div v-click="3">
-    <h3 class="text-xl font-bold text-orange-600 mb-2">3. Reverse Iteration</h3>
-    <p class="text-gray-600 text-sm">
-      By iterating through <code>topo</code> in reverse, we guarantee that we only push gradients to a node's children <em>after</em> that node's own gradient has been fully accumulated. The chain rule perfectly cascades backward!
-    </p>
-  </div>
-</div>
-
----
-layout: default
----
-
-# Stepping through Topo
-
-Let's look at our graph: `L = c + a` where `c = a * b`.<br>
-What does `build_topo(L)` actually produce using Depth-First Search?
-
-<div class="mt-8 flex justify-center w-full relative">
-  <!-- Topo List Container -->
-  <div class="flex items-center gap-4 border-2 border-gray-300 p-6 rounded-xl bg-gray-50 shadow-inner relative z-10">
-    <div class="absolute -top-3 left-4 bg-gray-50 px-2 text-sm font-bold text-gray-500 uppercase">topo = [</div>
-    <!-- Node a (First from DFS diving into c -> a) -->
-    <div class="flex flex-col items-center w-24 transition-opacity duration-500" :class="$clicks >= 1 ? 'opacity-100' : 'opacity-0'">
-      <div class="w-16 h-16 rounded-full border-4 flex items-center justify-center text-2xl font-bold shadow-md transition-all duration-500" :class="$clicks >= 8 ? 'border-orange-500 bg-orange-100 text-orange-700 ring-4 ring-orange-200' : 'border-gray-400 bg-white text-gray-600'">a</div>
-      <div class="mt-2 text-xs font-mono text-gray-400">leaf</div>
-      <div class="h-6 mt-1 flex items-center text-xs font-bold text-orange-600 transition-opacity duration-300" :class="$clicks >= 8 ? 'opacity-100' : 'opacity-0'">g: -2.0</div>
-    </div>
-    <div class="text-gray-300 text-xl font-bold transition-opacity duration-500" :class="$clicks >= 2 ? 'opacity-100' : 'opacity-0'">,</div>
-    <!-- Node b (Second from DFS returning to c and diving into b) -->
-    <div class="flex flex-col items-center w-24 transition-opacity duration-500" :class="$clicks >= 2 ? 'opacity-100' : 'opacity-0'">
-      <div class="w-16 h-16 rounded-full border-4 flex items-center justify-center text-2xl font-bold shadow-md transition-all duration-500" :class="$clicks >= 7 ? 'border-orange-500 bg-orange-100 text-orange-700 ring-4 ring-orange-200' : 'border-gray-400 bg-white text-gray-600'">b</div>
-      <div class="mt-2 text-xs font-mono text-gray-400">leaf</div>
-      <div class="h-6 mt-1 flex items-center text-xs font-bold text-orange-600 transition-opacity duration-300" :class="$clicks >= 7 ? 'opacity-100' : 'opacity-0'">g: 2.0</div>
-    </div>
-    <div class="text-gray-300 text-xl font-bold transition-opacity duration-500" :class="$clicks >= 3 ? 'opacity-100' : 'opacity-0'">,</div>
-    <!-- Node c (Third, done with its children) -->
-    <div class="flex flex-col items-center w-24 transition-opacity duration-500" :class="$clicks >= 3 ? 'opacity-100' : 'opacity-0'">
-      <div class="w-16 h-16 rounded-full border-4 flex items-center justify-center text-2xl font-bold shadow-md transition-all duration-500" :class="$clicks >= 6 ? 'border-orange-500 bg-orange-100 text-orange-700 ring-4 ring-orange-200' : 'border-gray-400 bg-white text-gray-600'">c</div>
-      <div class="mt-2 text-xs font-mono text-gray-400">c = a*b</div>
-      <div class="h-6 mt-1 flex items-center text-xs font-bold text-orange-600 transition-opacity duration-300" :class="$clicks >= 6 ? 'opacity-100' : 'opacity-0'">g: 1.0</div>
-    </div>
-    <div class="text-gray-300 text-xl font-bold transition-opacity duration-500" :class="$clicks >= 4 ? 'opacity-100' : 'opacity-0'">,</div>
-    <!-- Node L (Last, finished everything) -->
-    <div class="flex flex-col items-center w-24 transition-opacity duration-500" :class="$clicks >= 4 ? 'opacity-100' : 'opacity-0'">
-      <div class="w-16 h-16 rounded-full border-4 flex items-center justify-center text-2xl font-bold shadow-md transition-all duration-500" :class="$clicks >= 5 ? 'border-red-500 bg-red-100 text-red-800 ring-4 ring-red-200' : 'border-gray-400 bg-white text-gray-600'">L</div>
-      <div class="mt-2 text-xs font-mono text-gray-400">L = c+a</div>
-      <div class="h-6 mt-1 flex items-center text-xs font-bold text-red-600 transition-opacity duration-300" :class="$clicks >= 5 ? 'opacity-100' : 'opacity-0'">g: 1.0</div>
-    </div>
-    <div class="absolute -bottom-3 right-4 bg-gray-50 px-2 text-sm font-bold text-gray-500 uppercase">]</div>
-  </div>
-
-  <!-- Reversal Arrow and Label -->
-  <div class="absolute -bottom-16 left-1/2 transform -translate-x-1/2 w-3/4 max-w-lg h-12 flex items-center justify-center transition-all duration-700" :class="$clicks >= 5 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
-    <div class="text-orange-500 font-bold uppercase tracking-widest mr-4 text-sm flex-shrink-0 animate-pulse">reversed(topo)</div>
-    <div class="h-1 w-full bg-gradient-to-l from-orange-500 to-orange-200 rounded-full relative">
-      <div class="absolute -left-2 -top-[10px] w-0 h-0 border-y-[12px] border-y-transparent border-r-[16px] border-r-orange-500"></div>
-    </div>
-  </div>
-</div>
-
-<div class="mt-24 h-24 text-center relative w-full">
-  <!-- Building Phase -->
-  <div v-click="1" class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks === 1 ? 'opacity-100' : 'opacity-0'">
-    <p class="text-xl text-gray-700"><code>build_topo(L)</code> checks L's children: <strong>c</strong> and <strong>a</strong>. It dives into <strong>c</strong>. It checks <strong>c</strong>'s children: <strong>a</strong> and <strong>b</strong>. It dives into <strong>a</strong>. It's a leaf! Append <strong>a</strong>.</p>
-  </div>
-  <div v-click="2" class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks === 2 ? 'opacity-100' : 'opacity-0'">
-    <p class="text-xl text-gray-700">It returns to <strong>c</strong>, then dives into the other child: <strong>b</strong>. It's a leaf! Append <strong>b</strong>.</p>
-  </div>
-  <div v-click="3" class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks === 3 ? 'opacity-100' : 'opacity-0'">
-    <p class="text-xl text-gray-700">It returns to <strong>c</strong>. Both children (a, b) are now processed. Append <strong>c</strong>.</p>
-  </div>
-  <div v-click="4" class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks === 4 ? 'opacity-100' : 'opacity-0'">
-    <p class="text-xl text-gray-700">It returns to <strong>L</strong>. It already visited <strong>a</strong> earlier. All children of L are processed. Append <strong>L</strong>.</p>
-  </div>
-
-  <!-- Backprop Phase -->
-  <div v-click="5" class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks === 5 ? 'opacity-100' : 'opacity-0'">
-    <p class="text-xl text-emerald-700 font-bold mt-[-20px] mb-2 uppercase tracking-widest text-sm">Backward Pass</p>
-    <p class="text-xl text-gray-700">Now we iterate backward. We pull <strong>L</strong>. Its initial gradient is seeded to <code>1.0</code>. It passes gradients back via addition to <strong>c</strong> and <strong>a</strong>.</p>
-  </div>
-  <div v-click="6" class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks === 6 ? 'opacity-100' : 'opacity-0'">
-    <p class="text-xl text-emerald-700 font-bold mt-[-20px] mb-2 uppercase tracking-widest text-sm">Backward Pass</p>
-    <p class="text-xl text-gray-700">Next, we pull <strong>c</strong>. It has received its <code>1.0</code> grad from L. It passes gradients back via multiplication to <strong>a</strong> and <strong>b</strong>.</p>
-  </div>
-  <div v-click="7" class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks === 7 ? 'opacity-100' : 'opacity-0'">
-    <p class="text-xl text-emerald-700 font-bold mt-[-20px] mb-2 uppercase tracking-widest text-sm">Backward Pass</p>
-    <p class="text-xl text-gray-700">Next, we pull <strong>b</strong>. It's a leaf node. It has received its gradient from c. It has no children, so it does nothing.</p>
-  </div>
-  <div v-click="8" class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks >= 8 ? 'opacity-100' : 'opacity-0'">
-    <p class="text-xl text-emerald-700 font-bold mt-[-20px] mb-2 uppercase tracking-widest text-sm">Backward Pass</p>
-    <p class="text-xl text-gray-700">Finally, we pull <strong>a</strong>. It is also a leaf node. Because of the list order, we guarantee <strong>a</strong> has finished receiving gradients from <em>both</em> <strong>L</strong> and <strong>c</strong> before we visit it.</p>
-  </div>
-</div>
-
 
 
 ---
@@ -1582,6 +1436,222 @@ clicks: 1
     <v-click at="1" />
   </div>
 </div>
+
+---
+layout: default
+clicks: 6
+---
+
+# A Tiny Graph in Action
+
+Let's trace both passes for `L = a * b + a`.
+
+<div class="relative w-full h-[350px] mt-8">
+  <svg class="absolute inset-0 w-full h-full" style="z-index: 0;">
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af" />
+      </marker>
+      <marker id="arrow-grad" viewBox="0 0 10 10" refX="1" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <path d="M 10 0 L 0 5 L 10 10 z" fill="#f97316" />
+      </marker>
+    </defs>
+    <!-- a to c -->
+    <line x1="180" y1="100" x2="380" y2="180" stroke="#9ca3af" stroke-width="3" marker-end="url(#arrow)" />
+    <!-- b to c -->
+    <line x1="180" y1="260" x2="380" y2="180" stroke="#9ca3af" stroke-width="3" marker-end="url(#arrow)" />
+    <!-- c to L -->
+    <line x1="480" y1="180" x2="650" y2="180" stroke="#9ca3af" stroke-width="3" marker-end="url(#arrow)" />
+    <!-- a to L -->
+    <path d="M 180 80 Q 400 20 650 160" fill="none" stroke="#9ca3af" stroke-width="3" marker-end="url(#arrow)" />
+    <!-- Gradient paths -->
+    <g :class="$clicks >= 4 ? 'opacity-100' : 'opacity-0'" class="transition-opacity duration-500">
+      <line x1="650" y1="190" x2="480" y2="190" stroke="#f97316" stroke-dasharray="5,5" stroke-width="3" marker-start="url(#arrow-grad)" />
+      <path d="M 180 90 Q 400 30 650 170" fill="none" stroke="#f97316" stroke-dasharray="5,5" stroke-width="3" marker-start="url(#arrow-grad)" />
+    </g>
+    <g :class="$clicks >= 5 ? 'opacity-100' : 'opacity-0'" class="transition-opacity duration-500">
+      <line x1="380" y1="190" x2="180" y2="110" stroke="#f97316" stroke-dasharray="5,5" stroke-width="3" marker-start="url(#arrow-grad)" />
+      <line x1="380" y1="190" x2="180" y2="270" stroke="#f97316" stroke-dasharray="5,5" stroke-width="3" marker-start="url(#arrow-grad)" />
+    </g>
+  </svg>
+
+  <!-- Node A -->
+  <div class="absolute left-[80px] top-[60px] w-28 bg-white border-2 border-gray-300 rounded-lg shadow-md z-10 text-center overflow-hidden">
+    <div class="bg-gray-100 font-bold py-1 border-b border-gray-300">a</div>
+    <div class="py-1 flex justify-between px-3 text-sm" :class="$clicks >= 1 ? 'text-emerald-600 font-bold bg-emerald-50' : 'text-gray-300'"><span>d:</span><span>2.0</span></div>
+    <div class="py-1 flex justify-between px-3 text-sm border-t border-gray-100" :class="$clicks >= 6 ? 'text-orange-600 font-bold bg-orange-50' : ($clicks >= 4 ? 'text-orange-400 font-bold' : 'text-gray-300')"><span>g:</span><span>{{ $clicks >= 6 ? '-2.0' : ($clicks >= 4 ? '1.0' : '0.0') }}</span></div>
+  </div>
+
+  <!-- Node B -->
+  <div class="absolute left-[80px] top-[220px] w-28 bg-white border-2 border-gray-300 rounded-lg shadow-md z-10 text-center overflow-hidden">
+    <div class="bg-gray-100 font-bold py-1 border-b border-gray-300">b</div>
+    <div class="py-1 flex justify-between px-3 text-sm" :class="$clicks >= 1 ? 'text-emerald-600 font-bold bg-emerald-50' : 'text-gray-300'"><span>d:</span><span>-3.0</span></div>
+    <div class="py-1 flex justify-between px-3 text-sm border-t border-gray-100" :class="$clicks >= 5 ? 'text-orange-600 font-bold bg-orange-50' : 'text-gray-300'"><span>g:</span><span>{{ $clicks >= 5 ? '2.0' : '0.0' }}</span></div>
+  </div>
+
+  <!-- Node C -->
+  <div class="absolute left-[380px] top-[140px] w-28 bg-white border-2 border-gray-300 rounded-lg shadow-md z-10 text-center overflow-hidden">
+    <div class="bg-gray-100 font-bold py-1 border-b border-gray-300">c <span class="font-normal text-xs text-gray-500">(a*b)</span></div>
+    <div class="py-1 flex justify-between px-3 text-sm" :class="$clicks >= 2 ? 'text-emerald-600 font-bold bg-emerald-50' : 'text-gray-300'"><span>d:</span><span>-6.0</span></div>
+    <div class="py-1 flex justify-between px-3 text-sm border-t border-gray-100" :class="$clicks >= 4 ? 'text-orange-600 font-bold bg-orange-50' : 'text-gray-300'"><span>g:</span><span>{{ $clicks >= 4 ? '1.0' : '0.0' }}</span></div>
+  </div>
+
+  <!-- Node L -->
+  <div class="absolute left-[650px] top-[140px] w-28 bg-white border-2 border-gray-300 rounded-lg shadow-md z-10 text-center overflow-hidden">
+    <div class="bg-red-50 text-red-800 font-bold py-1 border-b border-gray-300">L <span class="font-normal text-xs opacity-70">(c+a)</span></div>
+    <div class="py-1 flex justify-between px-3 text-sm" :class="$clicks >= 3 ? 'text-emerald-600 font-bold bg-emerald-50' : 'text-gray-300'"><span>d:</span><span>-4.0</span></div>
+    <div class="py-1 flex justify-between px-3 text-sm border-t border-gray-100" :class="$clicks >= 3 ? 'text-orange-600 font-bold bg-orange-50' : 'text-gray-300'"><span>g:</span><span>{{ $clicks >= 3 ? '1.0' : '0.0' }}</span></div>
+  </div>
+</div>
+
+<div class="mt-4 text-center h-12">
+  <p v-if="$clicks === 1" class="text-emerald-600"><strong>1. Inputs:</strong> We start with raw values for a and b.</p>
+  <p v-if="$clicks === 2" class="text-emerald-600"><strong>2. Forward Pass:</strong> Multiply a and b to get c.</p>
+  <p v-if="$clicks === 3" class="text-emerald-600"><strong>3. Output & Base Grad:</strong> Add a to c to get L. We set L.grad = 1.0.</p>
+  <p v-if="$clicks === 4" class="text-orange-600"><strong>4. Backward (Add):</strong> Addition distributes the gradient equally. c.grad = 1.0, a.grad += 1.0.</p>
+  <p v-if="$clicks === 5" class="text-orange-600"><strong>5. Backward (Mul):</strong> Multiply swaps data values for grads. b.grad = a.data &times; c.grad = 2.0.</p>
+  <p v-if="$clicks === 6" class="text-orange-600"><strong>6. Accumulation:</strong> a.grad receives b.data &times; c.grad = -3.0. Total a.grad = 1.0 + (-3.0) = -2.0</p>
+</div>
+
+---
+layout: two-cols
+layoutClass: gap-12
+---
+
+# Orchestrating Backprop
+How does the network actually run the backward pass on thousands of nodes in the right order?
+
+```python {all|2-10|11|12-14|all}
+def backward(self):
+    topo = []
+    visited = set()
+    def build_topo(v):
+        if v not in visited:
+            visited.add(v)
+            for child in v._children:
+                build_topo(child)
+            topo.append(v)
+    build_topo(self)
+
+    self.grad = 1.0 # The base gradient
+    for v in reversed(topo):
+        # Accumulate grads to children
+        for child, local_grad in zip(v._children, v._local_grads):
+            child.grad += local_grad * v.grad
+```
+
+::right::
+
+<div class="flex flex-col justify-center h-full mt-4 space-y-6">
+  <div v-click="1">
+    <h3 class="text-xl font-bold text-emerald-600 mb-2">1. Topological Sort</h3>
+    <p class="text-gray-600 text-sm">
+      We start at the final output (Loss) and recursively visit all nodes. A node is only appended to <code>topo</code> <em>after</em> all its inputs (children) have been processed.
+    </p>
+  </div>
+
+  <div v-click="2">
+    <h3 class="text-xl font-bold text-blue-600 mb-2">2. The Seed</h3>
+    <p class="text-gray-600 text-sm">
+      We set the gradient of the Loss to <code>1.0</code>. (A unit change in the loss affects the loss by exactly 1.0).
+    </p>
+  </div>
+
+  <div v-click="3">
+    <h3 class="text-xl font-bold text-orange-600 mb-2">3. Reverse Iteration</h3>
+    <p class="text-gray-600 text-sm">
+      By iterating through <code>topo</code> in reverse, we guarantee that we only push gradients to a node's children <em>after</em> that node's own gradient has been fully accumulated. The chain rule perfectly cascades backward!
+    </p>
+  </div>
+</div>
+
+---
+layout: default
+clicks: 8
+---
+
+# Stepping through Topo
+
+Let's look at our graph: `L = c + a` where `c = a * b`.<br>
+What does `build_topo(L)` actually produce using Depth-First Search?
+
+<div class="mt-8 flex justify-center w-full relative">
+  <!-- Topo List Container -->
+  <div class="flex items-center gap-4 border-2 border-gray-300 p-6 rounded-xl bg-gray-50 shadow-inner relative z-10">
+    <div class="absolute -top-3 left-4 bg-gray-50 px-2 text-sm font-bold text-gray-500 uppercase">topo = [</div>
+    <!-- Node a (First from DFS diving into c -> a) -->
+    <div class="flex flex-col items-center w-24 transition-opacity duration-500" :class="$clicks >= 1 ? 'opacity-100' : 'opacity-0'">
+      <div class="w-16 h-16 rounded-full border-4 flex items-center justify-center text-2xl font-bold shadow-md transition-all duration-500" :class="$clicks >= 8 ? 'border-orange-500 bg-orange-100 text-orange-700 ring-4 ring-orange-200' : 'border-gray-400 bg-white text-gray-600'">a</div>
+      <div class="mt-2 text-xs font-mono text-gray-400">leaf</div>
+      <div class="h-6 mt-1 flex items-center text-xs font-bold text-orange-600 transition-opacity duration-300" :class="$clicks >= 8 ? 'opacity-100' : 'opacity-0'">g: -2.0</div>
+    </div>
+    <div class="text-gray-300 text-xl font-bold transition-opacity duration-500" :class="$clicks >= 2 ? 'opacity-100' : 'opacity-0'">,</div>
+    <!-- Node b (Second from DFS returning to c and diving into b) -->
+    <div class="flex flex-col items-center w-24 transition-opacity duration-500" :class="$clicks >= 2 ? 'opacity-100' : 'opacity-0'">
+      <div class="w-16 h-16 rounded-full border-4 flex items-center justify-center text-2xl font-bold shadow-md transition-all duration-500" :class="$clicks >= 7 ? 'border-orange-500 bg-orange-100 text-orange-700 ring-4 ring-orange-200' : 'border-gray-400 bg-white text-gray-600'">b</div>
+      <div class="mt-2 text-xs font-mono text-gray-400">leaf</div>
+      <div class="h-6 mt-1 flex items-center text-xs font-bold text-orange-600 transition-opacity duration-300" :class="$clicks >= 7 ? 'opacity-100' : 'opacity-0'">g: 2.0</div>
+    </div>
+    <div class="text-gray-300 text-xl font-bold transition-opacity duration-500" :class="$clicks >= 3 ? 'opacity-100' : 'opacity-0'">,</div>
+    <!-- Node c (Third, done with its children) -->
+    <div class="flex flex-col items-center w-24 transition-opacity duration-500" :class="$clicks >= 3 ? 'opacity-100' : 'opacity-0'">
+      <div class="w-16 h-16 rounded-full border-4 flex items-center justify-center text-2xl font-bold shadow-md transition-all duration-500" :class="$clicks >= 6 ? 'border-orange-500 bg-orange-100 text-orange-700 ring-4 ring-orange-200' : 'border-gray-400 bg-white text-gray-600'">c</div>
+      <div class="mt-2 text-xs font-mono text-gray-400">c = a*b</div>
+      <div class="h-6 mt-1 flex items-center text-xs font-bold text-orange-600 transition-opacity duration-300" :class="$clicks >= 6 ? 'opacity-100' : 'opacity-0'">g: 1.0</div>
+    </div>
+    <div class="text-gray-300 text-xl font-bold transition-opacity duration-500" :class="$clicks >= 4 ? 'opacity-100' : 'opacity-0'">,</div>
+    <!-- Node L (Last, finished everything) -->
+    <div class="flex flex-col items-center w-24 transition-opacity duration-500" :class="$clicks >= 4 ? 'opacity-100' : 'opacity-0'">
+      <div class="w-16 h-16 rounded-full border-4 flex items-center justify-center text-2xl font-bold shadow-md transition-all duration-500" :class="$clicks >= 5 ? 'border-red-500 bg-red-100 text-red-800 ring-4 ring-red-200' : 'border-gray-400 bg-white text-gray-600'">L</div>
+      <div class="mt-2 text-xs font-mono text-gray-400">L = c+a</div>
+      <div class="h-6 mt-1 flex items-center text-xs font-bold text-red-600 transition-opacity duration-300" :class="$clicks >= 5 ? 'opacity-100' : 'opacity-0'">g: 1.0</div>
+    </div>
+    <div class="absolute -bottom-3 right-4 bg-gray-50 px-2 text-sm font-bold text-gray-500 uppercase">]</div>
+  </div>
+
+  <!-- Reversal Arrow and Label -->
+  <div class="absolute -bottom-16 left-1/2 transform -translate-x-1/2 w-3/4 max-w-lg h-12 flex items-center justify-center transition-all duration-700" :class="$clicks >= 5 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'">
+    <div class="text-orange-500 font-bold uppercase tracking-widest mr-4 text-sm flex-shrink-0 animate-pulse">reversed(topo)</div>
+    <div class="h-1 w-full bg-gradient-to-l from-orange-500 to-orange-200 rounded-full relative">
+      <div class="absolute -left-2 -top-[10px] w-0 h-0 border-y-[12px] border-y-transparent border-r-[16px] border-r-orange-500"></div>
+    </div>
+  </div>
+</div>
+
+<div class="mt-24 h-24 text-center relative w-full">
+  <!-- Building Phase -->
+  <div class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks === 1 ? 'opacity-100' : 'opacity-0'">
+    <p class="text-xl text-gray-700"><code>build_topo(L)</code> checks L's children: <strong>c</strong> and <strong>a</strong>. It dives into <strong>c</strong>. It checks <strong>c</strong>'s children: <strong>a</strong> and <strong>b</strong>. It dives into <strong>a</strong>. It's a leaf! Append <strong>a</strong>.</p>
+  </div>
+  <div class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks === 2 ? 'opacity-100' : 'opacity-0'">
+    <p class="text-xl text-gray-700">It returns to <strong>c</strong>, then dives into the other child: <strong>b</strong>. It's a leaf! Append <strong>b</strong>.</p>
+  </div>
+  <div class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks === 3 ? 'opacity-100' : 'opacity-0'">
+    <p class="text-xl text-gray-700">It returns to <strong>c</strong>. Both children (a, b) are now processed. Append <strong>c</strong>.</p>
+  </div>
+  <div class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks === 4 ? 'opacity-100' : 'opacity-0'">
+    <p class="text-xl text-gray-700">It returns to <strong>L</strong>. It already visited <strong>a</strong> earlier. All children of L are processed. Append <strong>L</strong>.</p>
+  </div>
+
+  <!-- Backprop Phase -->
+  <div v-click="5" class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks === 5 ? 'opacity-100' : 'opacity-0'">
+    <p class="text-xl text-emerald-700 font-bold mb-2 uppercase tracking-widest text-sm">Backward Pass</p>
+    <p class="text-xl text-gray-700">Now we iterate backward. We pull <strong>L</strong>. Its initial gradient is seeded to <code>1.0</code>. It passes gradients back via addition to <strong>c</strong> and <strong>a</strong>.</p>
+  </div>
+  <div v-click="6" class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks === 6 ? 'opacity-100' : 'opacity-0'">
+    <p class="text-xl text-emerald-700 font-bold mb-2 uppercase tracking-widest text-sm">Backward Pass</p>
+    <p class="text-xl text-gray-700">Next, we pull <strong>c</strong>. It has received its <code>1.0</code> grad from L. It passes gradients back via multiplication to <strong>a</strong> and <strong>b</strong>.</p>
+  </div>
+  <div v-click="7" class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks === 7 ? 'opacity-100' : 'opacity-0'">
+    <p class="text-xl text-emerald-700 font-bold mt-[-20px] mb-2 uppercase tracking-widest text-sm">Backward Pass</p>
+    <p class="text-xl text-gray-700">Next, we pull <strong>b</strong>. It's a leaf node. It has received its gradient from c. It has no children, so it does nothing.</p>
+  </div>
+  <div v-click="8" class="absolute left-0 w-full px-12 transition-all duration-300" :class="$clicks >= 8 ? 'opacity-100' : 'opacity-0'">
+    <p class="text-xl text-emerald-700 font-bold mt-[-20px] mb-2 uppercase tracking-widest text-sm">Backward Pass</p>
+    <p class="text-xl text-gray-700">Finally, we pull <strong>a</strong>. It is also a leaf node. Because of the list order, we guarantee <strong>a</strong> has finished receiving gradients from <em>both</em> <strong>L</strong> and <strong>c</strong> before we visit it.</p>
+  </div>
+</div>
+
 
 ---
 layout: center
